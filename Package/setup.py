@@ -18,8 +18,8 @@ def _requires_from_file(filename):
 # version
 here = os.path.dirname(os.path.abspath(__file__))
 version = next((line.split('=')[1].strip().replace("'", '')
-                for line in open(os.path.join(here, 'debugtrace', '__init__.py'))
-                if line.startswith('__version__ = ')),
+                for line in open(os.path.join(here, 'debugtrace', 'version.py'))
+                if line.startswith('VERSION')),
                '0.0.0')
 
 setup(
