@@ -9,6 +9,7 @@ from logging import config
 import os
 import sys
 import traceback
+from debugtrace import _print as pr
 
 _DO_NOT_OUTPUT = 'Do not output'
 
@@ -29,11 +30,11 @@ def _get_config_value(key: str, fallback: object) -> object:
             value = value.replace('\\s', ' ')
 
     except BaseException as ex:
-        print('debugtrace: (' + _config_path + ') key: ' + key + ', error: '  + str(ex))
+        pr._print('debugtrace: (' + _config_path + ') key: ' + key + ', error: '  + str(ex), sys.stderr)
 
     return value
 
-_logger_name                 = _get_config_value('logger'                      , 'StdErr'                  )
+_logger_name                 = _get_config_value('logger'                      , 'stderr'                  ).lower()
 _logging_config_file         = _get_config_value('logging_config_file'         , 'logging.conf'            )
 _logging_logger_name         = _get_config_value('logging_logger_name'         , __package__               )
 _logging_level               = _get_config_value('logging_level'               , 'DEBUG'                   ).upper()
@@ -41,16 +42,16 @@ is_enabled                   = _get_config_value('is_enabled'                  ,
 enter_string                 = _get_config_value('enter_string'                , 'Enter'                   )
 leave_string                 = _get_config_value('leave_string'                , 'Leave'                   )
 limit_string                 = _get_config_value('limit_string'                , '...'                     )
-_maximum_indents             = _get_config_value('maximum_indents'              , 20                       )
+_maximum_indents             = _get_config_value('maximum_indents'             , 20                        )
 _code_indent_string          = _get_config_value('code_indent_string'          , '|   '                    )
 _data_indent_string          = _get_config_value('data_indent_string'          , '  '                      )
-non_output_string            = _get_config_value('non_output_string'            , '...'                     )
+non_output_string            = _get_config_value('non_output_string'           , '...'                     )
 cyclic_reference_string      = _get_config_value('cyclic_reference_string'     , '*** Cyclic Reference ***')
 varname_value_separator      = _get_config_value('varname_value_separator'     , ' = '                     )
 key_value_separator          = _get_config_value('key_value_separator'         , ': '                      )
 log_datetime_format          = _get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f'    )
 enter_format                 = _get_config_value('enter_format'                , '{0} ({1}:{2})'           )
-leave_format                 = _get_config_value('leave_format'                , '{0}'                     )
+leave_format                 = _get_config_value('leave_format'                , '{0} ({1})'                     )
 count_format                 = _get_config_value('count_format'                , 'count:{}'                )
 minimum_output_count         = _get_config_value('minimum_output_count'        , 5                         )
 string_length_format         = _get_config_value('string_length_format'        , 'length:{}'               )
@@ -66,37 +67,37 @@ output_non_public_attributes = [] # Not implemented
 
 class _LoggerBase(object):
     @abstractmethod
-    def print_(self, message: str) -> None:
+    def print(self, message: str) -> None:
         pass
 
 class _Std(_LoggerBase):
     def __init__(self, iostream):
         self.iostream = iostream
     
-    def print_(self, message: str) -> None:
-        print(datetime.datetime.now().strftime(log_datetime_format) + ' ' + message, file=self.iostream)
+    def print(self, message: str) -> None:
+        pr._print(datetime.datetime.now().strftime(log_datetime_format) + ' ' + message, self.iostream)
 
 class StdOut(_Std):
     def __init__(self):
         super().__init__(sys.stdout)
 
     def __str__(self):
-        return 'StdOut'
+        return 'sys.stsdout'
 
 class StdErr(_Std):
     def __init__(self):
         super().__init__(sys.stderr)
 
     def __str__(self):
-        return 'StdErr'
+        return 'sys.stderr'
 
 class Logger(_LoggerBase):
     def __init__(self):
         if os.path.exists(_logging_config_file):
             config.fileConfig(_logging_config_file)
         else:
-            print('debugtrace: (' + _config_path + ') _logging_config_file = ' + _logging_config_file + \
-                ' (Not found)', file=sys.stderr)
+            pr._print('debugtrace: (' + _config_path + ') _logging_config_file = ' + _logging_config_file + \
+                ' (Not found)', sys.stderr)
 
         self.logger = logging.getLogger(_logging_logger_name)
         self._logging_level = \
@@ -108,21 +109,21 @@ class Logger(_LoggerBase):
             logging.NOTSET   if _logging_level == 'NOTSET'   else \
             logging.DEBUG
 
-    def print_(self, message: str) -> None:
+    def print(self, message: str) -> None:
         self.logger.log(self._logging_level, message)
 
     def __str__(self):
         return "logging.Logger('" + _logging_logger_name + "'), logging level: " + _logging_level
 
 _logger = StdErr()
-if _logger_name == 'StdOut':
+if _logger_name == 'stdout':
     _logger = StdOut()
-elif _logger_name == 'StdErr':
+elif _logger_name == 'stderr':
     _logger = StdErr()
-elif _logger_name == 'Logger':
+elif _logger_name == 'logger':
     _logger = Logger()
 else:
-    print('debugtrace: (' + _config_path + ') logger = ' + _logger_name + ' (Unknown)', file=sys.stderr)
+    pr._print('debugtrace: (' + _config_path + ') logger = ' + _logger_name + ' (Unknown)', sys.stderr)
 
 _code_indent_strings = []
 _data_indent_strings = []
@@ -277,7 +278,7 @@ def _to_strings_using_refrection(value: object) -> list:
             continue
         value_strings = _to_strings(member[1])
         if len(value_strings) > 1:
-            # value is not one line
+            # the value string is not one line
             one_line = False
             break
 
@@ -445,7 +446,7 @@ def _has_str_method(value: object) -> bool:
     members = inspect.getmembers(value, lambda v: inspect.ismethod(v))
     return len([member for member in members if member[0] == '__str__']) != 0
 
-def print_(name: str, value: object = _DO_NOT_OUTPUT) -> None:
+def print(name: str, value: object = _DO_NOT_OUTPUT) -> None:
     '''
     Outputs the name and value.
 
@@ -466,7 +467,7 @@ def print_(name: str, value: object = _DO_NOT_OUTPUT) -> None:
     _reflected_objects.clear()
 
     if value is _DO_NOT_OUTPUT:
-        _logger.print_(_get_indent_string() + name)
+        _logger.print(_get_indent_string() + name)
     else:
         value_strings = _to_strings(value)
         first_line = True
@@ -475,7 +476,7 @@ def print_(name: str, value: object = _DO_NOT_OUTPUT) -> None:
             if  first_line:
                 line += name + varname_value_separator
             line += value_string
-            _logger.print_(line)
+            _logger.print(line)
             first_line = False
 
 class _DebugTrace(object):
@@ -497,9 +498,9 @@ class _DebugTrace(object):
             self.frame_summary = traceback.extract_stack(limit=3)[0]
 
         if _code_nest_level < _previous_nest_level:
-            _logger.print_('')
+            _logger.print('')
 
-        _logger.print_(_get_indent_string() +
+        _logger.print(_get_indent_string() +
             enter_string + ' ' +
             enter_format.format(
                 self.frame_summary.name,
@@ -513,9 +514,13 @@ class _DebugTrace(object):
         if not is_enabled: return
 
         _down_nest()
-        _logger.print_(_get_indent_string() +
+        _logger.print(_get_indent_string() +
             leave_string + ' ' +
-            leave_format.format(self.frame_summary.name)
+            leave_format.format(
+                self.frame_summary.name,
+                os.path.basename(self.frame_summary.filename),
+                self.frame_summary.lineno
+            )
         )
 
 def enter():
@@ -537,4 +542,5 @@ def enter():
 
 if is_enabled:
     from debugtrace import version
-    print_(__package__ + ' ' + version.VERSION + ' logger: ' + str(_logger))
+    print('DebugTrace-python ' + version.VERSION + ' -> ' + str(_logger))
+    print('')

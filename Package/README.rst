@@ -32,7 +32,7 @@ you can output the execution status of the program under development.
 Do the following for the debuggee and related functions or methods:
 
 * Insert "``_ = debugtrace.enter()``" at the beginning of functions and methods.
-* Insert "``debugtrace.print_('foo', foo)``" to output variables to the log if necessary.
+* Insert "``debugtrace.print('foo', foo)``" to output variables to the log if necessary.
 
 The following is an example of a Python program using DebugTrace-python and a log when it is executed.
 
@@ -56,7 +56,7 @@ The following is an example of a Python program using DebugTrace-python and a lo
             Contact(1, "Akane" , "Apple", datetime.date(1991, 2, 3)),
             Contact(2, "Yukari", "Apple", datetime.date(1992, 3, 4))
         ]
-        debugtrace.print_("contact", contact) # for Debugging
+        debugtrace.print("contact", contact) # for Debugging
 
     def func1():
         _ = debugtrace.enter() # for Debugging
@@ -67,26 +67,26 @@ The following is an example of a Python program using DebugTrace-python and a lo
 Log output contents:
 ::
 
-    2020-01-13 11:38:02.421897 debugtrace 1.0.0b1 logger: StdErr
-    2020-01-13 11:38:02.424168 Enter func1 (ReadmeExample.py:32)
-    2020-01-13 11:38:02.424248 |   Enter func2 (ReadmeExample.py:24)
-    2020-01-13 11:38:02.424727 |   |   contact = (list)[
-    2020-01-13 11:38:02.424743 |   |     (__main__.Contact){
-    2020-01-13 11:38:02.424750 |   |       birthday: 1991-02-03,
-    2020-01-13 11:38:02.424756 |   |       firstName: (length:5)'Akane',
-    2020-01-13 11:38:02.424761 |   |       id: 1,
-    2020-01-13 11:38:02.424766 |   |       lastName: (length:5)'Apple',
-    2020-01-13 11:38:02.424771 |   |     },
-    2020-01-13 11:38:02.424777 |   |     (__main__.Contact){
-    2020-01-13 11:38:02.424782 |   |       birthday: 1992-03-04,
-    2020-01-13 11:38:02.424787 |   |       firstName: (length:6)'Yukari',
-    2020-01-13 11:38:02.424798 |   |       id: 2,
-    2020-01-13 11:38:02.424804 |   |       lastName: (length:5)'Apple',
-    2020-01-13 11:38:02.424809 |   |     },
-    2020-01-13 11:38:02.424814 |   |   ]
-    2020-01-13 11:38:02.424824 |   Leave func2
-    2020-01-13 11:38:02.424833 Leave func1
-
+    2020-01-30 23:36:16.598567 DebugTrace-python 1.0.0b4 -> sys.stderr
+    2020-01-30 23:36:16.598652 
+    2020-01-30 23:36:16.601778 Enter func1 (ReadmeExample.py:22)
+    2020-01-30 23:36:16.601956 |   Enter func2 (ReadmeExample.py:14)
+    2020-01-30 23:36:16.602440 |   |   contact = (list)[
+    2020-01-30 23:36:16.602482 |   |     (__main__.Contact){
+    2020-01-30 23:36:16.602517 |   |       birthday: 1991-02-03,
+    2020-01-30 23:36:16.602549 |   |       firstName: (length:5)'Akane',
+    2020-01-30 23:36:16.602586 |   |       id: 1,
+    2020-01-30 23:36:16.602617 |   |       lastName: (length:5)'Apple',
+    2020-01-30 23:36:16.602647 |   |     },
+    2020-01-30 23:36:16.602678 |   |     (__main__.Contact){
+    2020-01-30 23:36:16.602707 |   |       birthday: 1992-03-04,
+    2020-01-30 23:36:16.602738 |   |       firstName: (length:6)'Yukari',
+    2020-01-30 23:36:16.602767 |   |       id: 2,
+    2020-01-30 23:36:16.602797 |   |       lastName: (length:5)'Apple',
+    2020-01-30 23:36:16.602827 |   |     },
+    2020-01-30 23:36:16.602857 |   |   ]
+    2020-01-30 23:36:16.602896 |   Leave func2 (ReadmeExample.py)
+    2020-01-30 23:36:16.602935 Leave func1 (ReadmeExample.py)
 
 4. Functions
 ============
@@ -106,12 +106,12 @@ There are mainly the following functions.
         | Also outputs a leaving log at the end of the code block.
         | *Example*:
         | ``_ = debugtrace.enter()``
-    * - ``print_``
+    * - ``print``
       - | ``name``: Variable name, etc.
         | ``value``: Output value
       - | Outputs the variable name and value.
         | *Example*:
-        | ``debugtrace.print_('foo', foo)```
+        | ``debugtrace.print('foo', foo)```
 
 
 5. Options that can be specified in the **debugtrace.ini** file
@@ -227,8 +227,13 @@ MIT License (MIT)
 7. Release notes
 ================
 
-``DebugTrace-python 1.0.0b1 - 2020-01-13``
-------------------------------------------
+``DebugTrace-python 1.0.0b4 - Jan. 31, 2020``
+------------------------------------------------
+
+* Change ``print_`` function name to ``print``.
+
+``DebugTrace-python 1.0.0b2 - Jan. 13, 2020``
+------------------------------------------------
 
 * First release (beta version)
 

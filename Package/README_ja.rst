@@ -27,7 +27,7 @@ DebugTrace-python
 デバッグ対象および関連する関数またはメソッドに対して以下を行います。
 
 * 関数またはメソッドの先頭に "``_ = debugtrace.enter()``" を挿入する。
-* 必要に応じて変数をログに出力する "``debugtrace.print_('foo', foo)``" を挿入する。
+* 必要に応じて変数をログに出力する "``debugtrace.print('foo', foo)``" を挿入する。
 
 以下は、DebugTrace-pythonを使用したPythonプログラムの例とそれを実行した際のログです。
 
@@ -51,7 +51,7 @@ DebugTrace-python
             Contact(1, "Akane" , "Apple", datetime.date(1991, 2, 3)),
             Contact(2, "Yukari", "Apple", datetime.date(1992, 3, 4))
         ]
-        debugtrace.print_("contact", contact) # for Debugging
+        debugtrace.print("contact", contact) # for Debugging
 
     def func1():
         _ = debugtrace.enter() # for Debugging
@@ -62,26 +62,26 @@ DebugTrace-python
 ログの出力内容:
 ::
 
-    2020-01-13 11:38:02.421897 debugtrace 1.0.0b1 logger: StdErr
-    2020-01-13 11:38:02.424168 Enter func1 (ReadmeExample.py:32)
-    2020-01-13 11:38:02.424248 |   Enter func2 (ReadmeExample.py:24)
-    2020-01-13 11:38:02.424727 |   |   contact = (list)[
-    2020-01-13 11:38:02.424743 |   |     (__main__.Contact){
-    2020-01-13 11:38:02.424750 |   |       birthday: 1991-02-03,
-    2020-01-13 11:38:02.424756 |   |       firstName: (length:5)'Akane',
-    2020-01-13 11:38:02.424761 |   |       id: 1,
-    2020-01-13 11:38:02.424766 |   |       lastName: (length:5)'Apple',
-    2020-01-13 11:38:02.424771 |   |     },
-    2020-01-13 11:38:02.424777 |   |     (__main__.Contact){
-    2020-01-13 11:38:02.424782 |   |       birthday: 1992-03-04,
-    2020-01-13 11:38:02.424787 |   |       firstName: (length:6)'Yukari',
-    2020-01-13 11:38:02.424798 |   |       id: 2,
-    2020-01-13 11:38:02.424804 |   |       lastName: (length:5)'Apple',
-    2020-01-13 11:38:02.424809 |   |     },
-    2020-01-13 11:38:02.424814 |   |   ]
-    2020-01-13 11:38:02.424824 |   Leave func2
-    2020-01-13 11:38:02.424833 Leave func1
-
+    2020-01-30 23:36:16.598567 DebugTrace-python 1.0.0b4 -> sys.stderr
+    2020-01-30 23:36:16.598652 
+    2020-01-30 23:36:16.601778 Enter func1 (ReadmeExample.py:22)
+    2020-01-30 23:36:16.601956 |   Enter func2 (ReadmeExample.py:14)
+    2020-01-30 23:36:16.602440 |   |   contact = (list)[
+    2020-01-30 23:36:16.602482 |   |     (__main__.Contact){
+    2020-01-30 23:36:16.602517 |   |       birthday: 1991-02-03,
+    2020-01-30 23:36:16.602549 |   |       firstName: (length:5)'Akane',
+    2020-01-30 23:36:16.602586 |   |       id: 1,
+    2020-01-30 23:36:16.602617 |   |       lastName: (length:5)'Apple',
+    2020-01-30 23:36:16.602647 |   |     },
+    2020-01-30 23:36:16.602678 |   |     (__main__.Contact){
+    2020-01-30 23:36:16.602707 |   |       birthday: 1992-03-04,
+    2020-01-30 23:36:16.602738 |   |       firstName: (length:6)'Yukari',
+    2020-01-30 23:36:16.602767 |   |       id: 2,
+    2020-01-30 23:36:16.602797 |   |       lastName: (length:5)'Apple',
+    2020-01-30 23:36:16.602827 |   |     },
+    2020-01-30 23:36:16.602857 |   |   ]
+    2020-01-30 23:36:16.602896 |   Leave func2 (ReadmeExample.py)
+    2020-01-30 23:36:16.602935 Leave func1 (ReadmeExample.py)
 
 4. 関数
 =========================
@@ -101,12 +101,12 @@ DebugTrace-python
         | またコードブロックの終了時に終了ログを出力します。
         | *使用例:*
         | ``_ = debugtrace.enter()``
-    * - ``print_``
+    * - ``print``
       - | ``name``: 変数名など
         | ``value``: 出力する値
       - | 変数名と値を出力します。
         | *使用例:*
-        | ``debugtrace.print_('foo', foo)```
+        | ``debugtrace.print('foo', foo)```
 
 
 5. **debugtrace.ini** ファイルで指定可能なオプション
@@ -221,7 +221,12 @@ MIT ライセンス(MIT)
 7. リリースノート
 ==================
 
-``DebugTrace-python 1.0.0b1 - 2020-01-13``
+``DebugTrace-python 1.0.0b4 - 2020-01-31``
+------------------------------------------
+
+* ``print_`` 関数名を ``print`` に変更
+
+``DebugTrace-python 1.0.0b2 - 2020-01-13``
 ------------------------------------------
 
 * 最初のリリース (beta版)

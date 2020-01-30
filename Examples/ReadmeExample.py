@@ -16,7 +16,7 @@ def func2():
         Contact(1, "Akane" , "Apple", datetime.date(1991, 2, 3)),
         Contact(2, "Yukari", "Apple", datetime.date(1992, 3, 4))
     ]
-    debugtrace.print_("contact", contact) # for Debugging
+    debugtrace.print("contact", contact) # for Debugging
 
 def func1():
     _ = debugtrace.enter() # for Debugging
