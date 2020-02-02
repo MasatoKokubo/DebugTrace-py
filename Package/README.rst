@@ -117,7 +117,7 @@ There are mainly the following functions.
 5. Options that can be specified in the **debugtrace.ini** file
 ===============================================================
 
-DebugTrace-python reads the `` debugtrace.ini`` file
+DebugTrace-python reads the ``debugtrace.ini`` file
 in the current directory for initialization.
 The section is ``[debugtrace]``.
 
@@ -186,14 +186,16 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - ``%Y-%m-%d %H:%M:%S.%f``
     * - ``enter_format``
       - | Format of the log output when entering function or method
-        | ``{0}: function or method name``
-        | ``{1}: file name``
-        | ``{2}: line number``
+        | ``{0}: the function or method name``
+        | ``{1}: the file name``
+        | ``{2}: the line number``
       - ``{0} ({1}:{2})``
     * - ``leave_format``
       - | Format of log output when leaving function or method
         | ``{0}: function or method name``
-      - ``{0}``
+        | ``{1}: the file name``
+        | ``{2}: the time from entering``
+      - ``{0} ({1}) time: {2}``
     * - ``count_format``
       - Output format of the number of elements such as ``list``, ``tuple``, ``dict`` and etc.
       - ``count:{}``
@@ -226,6 +228,11 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-python 1.0.0b5 - Feb. 3, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
 
 ``DebugTrace-python 1.0.0b4 - Jan. 31, 2020``
 ------------------------------------------------

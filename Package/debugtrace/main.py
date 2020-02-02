@@ -51,7 +51,7 @@ varname_value_separator      = _get_config_value('varname_value_separator'     ,
 key_value_separator          = _get_config_value('key_value_separator'         , ': '                      )
 log_datetime_format          = _get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f'    )
 enter_format                 = _get_config_value('enter_format'                , '{0} ({1}:{2})'           )
-leave_format                 = _get_config_value('leave_format'                , '{0} ({1})'                     )
+leave_format                 = _get_config_value('leave_format'                , '{0} ({1}) time: {2}'     )
 count_format                 = _get_config_value('count_format'                , 'count:{}'                )
 minimum_output_count         = _get_config_value('minimum_output_count'        , 5                         )
 string_length_format         = _get_config_value('string_length_format'        , 'length:{}'               )
@@ -130,6 +130,7 @@ _data_indent_strings = []
 _code_nest_level     = 0
 _previous_nest_level = 0
 _data_nest_level     = 0
+_last_print_strings  = []
 _reflected_objects   = []
 
 def _up_nest() -> None:
@@ -172,7 +173,7 @@ def _get_data_indent_string() -> str:
         _data_nest_level
     ]
 
-def _to_strings(value: object) -> list:
+def _to_strings(value: object, output_private: bool) -> list:
     strings = []
     if isinstance(value, type(None)):
         # None
@@ -240,7 +241,7 @@ def _to_strings(value: object) -> list:
             isinstance(value, tuple) or \
             isinstance(value, dict):
         # list, set, frozenset, tuple, dict
-        strings = _to_strings_iter(value)
+        strings = _to_strings_iterator(value, output_private)
 
     elif _has_str_method(value):
         # has __str__ method
@@ -256,75 +257,85 @@ def _to_strings(value: object) -> list:
             strings.append(limit_string)
         else:
             _reflected_objects.append(value)
-            strings = _to_strings_using_refrection(value)
+            strings = _to_strings_using_refrection(value, output_private)
             _reflected_objects.pop()
 
     return strings
 
-def _to_strings_using_refrection(value: object) -> list:
+def _to_strings_using_refrection(value: object, output_private: bool) -> list:
     global _data_nest_level
 
-    strings = []
-    members = inspect.getmembers(value,
+    base_members = inspect.getmembers(value,
         lambda v: not inspect.isclass(v) and not inspect.ismethod(v) and not inspect.isbuiltin(v))
 
-    # try one line
-    one_line = True
-    string = _get_type_name(value) + '{'
-    delimiter = ''
+    members = [m for m in base_members
+            if (not m[0].startswith('__') or not m[0].endswith('__')) and
+                (output_private or not m[0].startswith('_'))]
+
+    strings = []
+    _data_nest_level += 1
+    indent_string = _get_data_indent_string()
+
+    string = _get_type_name(value)
+    string += '{'
+
+    member_index = 0
+    line_breaked = False
+    string_backup = string
     for member in members:
         name = member[0]
-        if name.startswith('__') and name.endswith('__'):
-            continue
-        value_strings = _to_strings(member[1])
-        if len(value_strings) > 1:
-            # the value string is not one line
-            one_line = False
-            break
+        value_strings = _to_strings(member[1], output_private)
 
-        string += delimiter + name + key_value_separator + value_strings[0]
-        if len(string) > maximum_data_output_width:
-            one_line = False
-            break
+        if not line_breaked and len(value_strings) > 1:
+            # multi line value strings
+            strings.append(string)
+            string = indent_string
+            line_breaked = True
 
-        delimiter = ', '
-    
-    if one_line:
-        # strings is one line
-        string += '}'
-        strings.append(string)
-    else:
-        # strings is not one line
-        strings.append(_get_type_name(value) + '{')
-        _data_nest_level += 1
-        _data_indent_string = _get_data_indent_string()
+        string_backup2 = string
+        string += name
+        string += key_value_separator
 
-        for member in members:
-            name = member[0]
-            if name.startswith('__') and name.endswith('__'):
-                continue
-            strings.append(_data_indent_string + name + key_value_separator)
+        value_index = 0
+        for value_string in value_strings:
+            if value_index == 0:
+                string += value_string
+            else:
+                strings.append(string)
+                string = value_string
 
-            value_strings = _to_strings(member[1])
-            is_first = True
-            for value_string in value_strings:
-                if is_first:
-                    strings[-1] += value_strings[0]
+            if not line_breaked and len(string) > maximum_data_output_width:
+                if len(strings) == 0:
+                    # first line break
+                    strings.append(string_backup)
+                    right_string = string[len(string_backup):]
+                    string = indent_string
+                    string += right_string
                 else:
-                    strings.append(value_string)
-                is_first = False
+                    strings.append(string_backup2)
+                    string = indent_string
+                    string += name
+                    string += key_value_separator
+                    string += value_string
+            value_index += 1
 
-            strings[-1] += ','
+        if member_index < len(members) - 1:
+            string += ', '
+        line_breaked = False
+        member_index += 1
 
-        _data_nest_level -= 1
-        strings.append(_get_data_indent_string() + '}')
+    _data_nest_level -= 1
+    if not line_breaked and len(strings) > 0:
+        strings.append(string)
+        string = _get_data_indent_string()
+    string += '}'
+    strings.append(string)
 
     return strings
 
-def _to_strings_iter(values: object) -> list:
+def _to_strings_iterator(values: object, output_private: bool) -> list:
     global _data_nest_level
 
-    strings = []
     open_char = '{' # set, frozenset, dict
     close_char = '}'
     if isinstance(values, list):
@@ -336,99 +347,108 @@ def _to_strings_iter(values: object) -> list:
         open_char = '('
         close_char = ')'
     
-    # try one line
-    one_line = True
-    type_str = _get_type_name(values, len(values))
-    string = type_str
+    strings = []
+    _data_nest_level += 1
+    indent_string = _get_data_indent_string()
+
+    string = _get_type_name(values, len(values))
     string += open_char
-    delimiter = ''
-    count = 1
-    for value in values:
-        string += delimiter
-        if count > collection_limit:
+
+    element_index = 0
+    line_breaked = False
+    string_backup = string
+    for element in values:
+        if element_index >= collection_limit:
             string += limit_string
             break
+
+        value_strings = []
         if isinstance(values, dict):
             # dictionary
-            key_strings = _to_strings(value)
-            value_strings = _to_strings(values[value])
-            if len(key_strings) > 1 or len(value_strings) > 1:
-                # multi lines
-                one_line = False
-                break
-            string += key_strings[0]
-            string += key_value_separator
-            string += value_strings[0]
+            value_strings = _to_strings_keyvalue(element, values[element], output_private)
         else:
             # list, set, frozenset or tuple
-            value_strings = _to_strings(value)
-            if len(value_strings) > 1:
-                # multi lines
-                one_line = False
-                break
-            string += value_strings[0]
+            value_strings = _to_strings(element, output_private)
 
-        if len(string) > maximum_data_output_width:
-            one_line = False
-            break
+        if not line_breaked and len(value_strings) > 1:
+            # multi line element strings
+            strings.append(string)
+            string = indent_string
+            line_breaked = True
 
-        delimiter = ', '
-        count += 1
+        string_backup2 = string
 
-    if one_line:
-        # strings is one line
-        string += close_char
-        strings.append(string)
-
-    else:
-        # strings is not one line
-        strings.append(type_str + open_char)
-        _data_nest_level += 1
-        _data_indent_string = _get_data_indent_string()
-        count = 1
-        for value in values:
-            if count > collection_limit:
-                strings.append(_data_indent_string + limit_string)
-                break
-            if isinstance(values, dict):
-                # dictionary
-                # key
-                key_strings = _to_strings(value)
-                is_first = True
-                for key_string in key_strings:
-                    if is_first:
-                        strings.append(_data_indent_string + key_string)
-                    else:
-                        strings.append(key_string)
-                    is_first = False
-                strings[-1] += key_value_separator
-
-                # value
-                value_strings = _to_strings(values[value])
-                is_first = True
-                for value_string in value_strings:
-                    if is_first:
-                        strings[-1] += value_string
-                    else:
-                        strings.append(value_string)
-                    is_first = False
+        value_index = 0
+        for value_string in value_strings:
+            if value_index == 0:
+                string += value_string
             else:
-                # list, set or tuple
-                value_strings = _to_strings(value)
-                is_first = True
-                for value_string in value_strings:
-                    if is_first:
-                        strings.append(_data_indent_string + value_string)
-                    else:
-                        strings.append(value_string)
-                    is_first = False
+                strings.append(string)
+                string = value_string
 
-            strings[-1] += ','
-            count += 1
+            if not line_breaked and len(string) > maximum_data_output_width:
+                if len(strings) == 0:
+                    # first line break
+                    strings.append(string_backup)
+                    right_string = string[len(string_backup):]
+                    string = indent_string
+                    string += right_string
+                else:
+                    strings.append(string_backup2)
+                    string = indent_string
+                    string += value_string
 
-        _data_nest_level -= 1
-        strings.append(_get_data_indent_string() + close_char)
+            value_index += 1
 
+        if element_index < len(values) - 1:
+            string += ', '
+        line_breaked = False
+        element_index += 1
+
+    _data_nest_level -= 1
+    if not line_breaked and len(strings) > 0:
+        strings.append(string)
+        string = _get_data_indent_string()
+    string += close_char
+    strings.append(string)
+
+    return strings
+
+def _to_strings_keyvalue(key: object, value: object, output_private: bool) -> list:
+    global _data_nest_level
+
+    strings = []
+    string = ''
+    key_strings = _to_strings(key, output_private)
+    value_strings = _to_strings(value, output_private)
+
+    # key
+    indent_string = _get_data_indent_string()
+    index = 0
+    for key_string in key_strings:
+        string += key_string
+        if index < len(key_strings) - 1:
+            # not last
+            strings.append(string)
+            string = indent_string
+        index += 1
+
+    string += key_value_separator
+
+    # value
+    _data_nest_level += 1
+    indent_string = _get_data_indent_string()
+    index = 0
+    for value_string in value_strings:
+        string += value_string
+        if index < len(value_strings) - 1:
+            # not last
+            strings.append(string)
+            string = indent_string
+        index += 1
+    _data_nest_level -= 1
+
+    strings.append(string)
     return strings
 
 def _get_type_name(value: object, count: int = -1) -> str:
@@ -443,10 +463,13 @@ def _get_type_name(value: object, count: int = -1) -> str:
         else '(' + type_name + ' ' + count_format.format(count) + ')'
 
 def _has_str_method(value: object) -> bool:
-    members = inspect.getmembers(value, lambda v: inspect.ismethod(v))
-    return len([member for member in members if member[0] == '__str__']) != 0
+    try:
+        members = inspect.getmembers(value, lambda v: inspect.ismethod(v))
+        return len([member for member in members if member[0] == '__str__']) != 0
+    except:
+        return False
 
-def print(name: str, value: object = _DO_NOT_OUTPUT) -> None:
+def print(name: str, value: object = _DO_NOT_OUTPUT, *, output_private: bool = False) -> None:
     '''
     Outputs the name and value.
 
@@ -460,6 +483,8 @@ def print(name: str, value: object = _DO_NOT_OUTPUT) -> None:
             Japanese:出力する値 (省略されていなければ)
     '''
     global _data_nest_level
+    global _last_print_strings
+    global _reflected_objects
 
     if not is_enabled: return
 
@@ -469,9 +494,14 @@ def print(name: str, value: object = _DO_NOT_OUTPUT) -> None:
     if value is _DO_NOT_OUTPUT:
         _logger.print(_get_indent_string() + name)
     else:
-        value_strings = _to_strings(value)
+        last_print_lines = len(_last_print_strings)
+        _last_print_strings = _to_strings(value, output_private)
+
+        if last_print_lines > 1 or len(_last_print_strings) > 1:
+            _logger.print('')
+
         first_line = True
-        for value_string in value_strings:
+        for value_string in _last_print_strings:
             line = _get_indent_string()
             if  first_line:
                 line += name + varname_value_separator
@@ -487,7 +517,7 @@ class _DebugTrace(object):
     Japanese:
     初期化時に開始ログを出力し、削除時に終了ログを出力します。
     '''
-    __slots__ = ['frame_summary']
+    __slots__ = ['frame_summary', 'enter_time']
     
     def __init__(self):
         if not is_enabled: return
@@ -497,10 +527,11 @@ class _DebugTrace(object):
         except RuntimeError:
             self.frame_summary = traceback.extract_stack(limit=3)[0]
 
+        indent_string = _get_indent_string()
         if _code_nest_level < _previous_nest_level:
-            _logger.print('')
+            _logger.print(indent_string)
 
-        _logger.print(_get_indent_string() +
+        _logger.print(indent_string +
             enter_string + ' ' +
             enter_format.format(
                 self.frame_summary.name,
@@ -509,17 +540,19 @@ class _DebugTrace(object):
             )
         )
         _up_nest()
+        self.enter_time = datetime.datetime.now()
 
     def __del__(self):
         if not is_enabled: return
 
+        time = datetime.datetime.now() - self.enter_time
         _down_nest()
         _logger.print(_get_indent_string() +
             leave_string + ' ' +
             leave_format.format(
                 self.frame_summary.name,
                 os.path.basename(self.frame_summary.filename),
-                self.frame_summary.lineno
+                time
             )
         )
 
