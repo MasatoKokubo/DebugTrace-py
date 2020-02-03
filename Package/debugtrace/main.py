@@ -51,7 +51,7 @@ varname_value_separator      = _get_config_value('varname_value_separator'     ,
 key_value_separator          = _get_config_value('key_value_separator'         , ': '                      )
 log_datetime_format          = _get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f'    )
 enter_format                 = _get_config_value('enter_format'                , '{0} ({1}:{2})'           )
-leave_format                 = _get_config_value('leave_format'                , '{0} ({1}) time: {2}'     )
+leave_format                 = _get_config_value('leave_format'                , '{0} ({1}:{2}) time: {3}'     )
 count_format                 = _get_config_value('count_format'                , 'count:{}'                )
 minimum_output_count         = _get_config_value('minimum_output_count'        , 5                         )
 string_length_format         = _get_config_value('string_length_format'        , 'length:{}'               )
@@ -173,7 +173,9 @@ def _get_data_indent_string() -> str:
         _data_nest_level
     ]
 
-def _to_strings(value: object, output_private: bool) -> list:
+def _to_strings(value: object,
+        output_private: bool,
+        output_method: bool) -> list:
     strings = []
     if isinstance(value, type(None)):
         # None
@@ -241,7 +243,7 @@ def _to_strings(value: object, output_private: bool) -> list:
             isinstance(value, tuple) or \
             isinstance(value, dict):
         # list, set, frozenset, tuple, dict
-        strings = _to_strings_iterator(value, output_private)
+        strings = _to_strings_iterator(value, output_private, output_method)
 
     elif _has_str_method(value):
         # has __str__ method
@@ -257,20 +259,28 @@ def _to_strings(value: object, output_private: bool) -> list:
             strings.append(limit_string)
         else:
             _reflected_objects.append(value)
-            strings = _to_strings_using_refrection(value, output_private)
+            strings = _to_strings_using_refrection(value, output_private, output_method)
             _reflected_objects.pop()
 
     return strings
 
-def _to_strings_using_refrection(value: object, output_private: bool) -> list:
+def _to_strings_using_refrection(value: object,
+        output_private: bool,
+        output_method: bool) -> list:
     global _data_nest_level
 
-    base_members = inspect.getmembers(value,
-        lambda v: not inspect.isclass(v) and not inspect.ismethod(v) and not inspect.isbuiltin(v))
+    members = []
+    try:
+        base_members = inspect.getmembers(value,
+            lambda v: not inspect.isclass(v) and
+                (output_method or not inspect.ismethod(v)) and
+                not inspect.isbuiltin(v))
 
-    members = [m for m in base_members
-            if (not m[0].startswith('__') or not m[0].endswith('__')) and
-                (output_private or not m[0].startswith('_'))]
+        members = [m for m in base_members
+                if (not m[0].startswith('__') or not m[0].endswith('__')) and
+                    (output_private or not m[0].startswith('_'))]
+    except BaseException as ex:
+        return [str(ex)]
 
     strings = []
     _data_nest_level += 1
@@ -284,7 +294,7 @@ def _to_strings_using_refrection(value: object, output_private: bool) -> list:
     string_backup = string
     for member in members:
         name = member[0]
-        value_strings = _to_strings(member[1], output_private)
+        value_strings = _to_strings(member[1], output_private, output_method)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line value strings
@@ -333,7 +343,9 @@ def _to_strings_using_refrection(value: object, output_private: bool) -> list:
 
     return strings
 
-def _to_strings_iterator(values: object, output_private: bool) -> list:
+def _to_strings_iterator(values: object,
+        output_private: bool,
+        output_method: bool) -> list:
     global _data_nest_level
 
     open_char = '{' # set, frozenset, dict
@@ -365,10 +377,10 @@ def _to_strings_iterator(values: object, output_private: bool) -> list:
         value_strings = []
         if isinstance(values, dict):
             # dictionary
-            value_strings = _to_strings_keyvalue(element, values[element], output_private)
+            value_strings = _to_strings_keyvalue(element, values[element], output_private, output_method)
         else:
             # list, set, frozenset or tuple
-            value_strings = _to_strings(element, output_private)
+            value_strings = _to_strings(element, output_private, output_method)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line element strings
@@ -414,13 +426,15 @@ def _to_strings_iterator(values: object, output_private: bool) -> list:
 
     return strings
 
-def _to_strings_keyvalue(key: object, value: object, output_private: bool) -> list:
+def _to_strings_keyvalue(key: object, value: object,
+        output_private: bool,
+        output_method: bool) -> list:
     global _data_nest_level
 
     strings = []
     string = ''
-    key_strings = _to_strings(key, output_private)
-    value_strings = _to_strings(value, output_private)
+    key_strings = _to_strings(key, output_private, output_method)
+    value_strings = _to_strings(value, output_private, output_method)
 
     # key
     indent_string = _get_data_indent_string()
@@ -469,7 +483,9 @@ def _has_str_method(value: object) -> bool:
     except:
         return False
 
-def print(name: str, value: object = _DO_NOT_OUTPUT, *, output_private: bool = False) -> None:
+def print(name: str, value: object = _DO_NOT_OUTPUT, *,
+        output_private: bool = False,
+        output_method: bool = False) -> None:
     '''
     Outputs the name and value.
 
@@ -477,10 +493,16 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *, output_private: bool = F
 
     Args:
         name: The name of the value (simply output message if the value is omitted)
-            Japanese:出力する名前 (valueが省略されている場合は、単に出力するメッセージ)
+            Japanese: 出力する名前 (valueが省略されている場合は、単に出力するメッセージ)
 
         value: The value to output if not omitted
-            Japanese:出力する値 (省略されていなければ)
+            Japanese: 出力する値 (省略されていなければ)
+
+        output_private: Output private member if True
+            Japanese: Trueならプライベートメンバーを出力する
+
+        output_method: Output method if True
+            Japanese:  Trueならメソッドを出力する
     '''
     global _data_nest_level
     global _last_print_strings
@@ -491,18 +513,19 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *, output_private: bool = F
     _data_nest_level = 0
     _reflected_objects.clear()
 
+    indent_string = _get_indent_string()
     if value is _DO_NOT_OUTPUT:
-        _logger.print(_get_indent_string() + name)
+        _logger.print(indent_string + name)
     else:
         last_print_lines = len(_last_print_strings)
-        _last_print_strings = _to_strings(value, output_private)
+        _last_print_strings = _to_strings(value, output_private, output_method)
 
         if last_print_lines > 1 or len(_last_print_strings) > 1:
-            _logger.print('')
+            _logger.print(indent_string)
 
         first_line = True
         for value_string in _last_print_strings:
-            line = _get_indent_string()
+            line = indent_string
             if  first_line:
                 line += name + varname_value_separator
             line += value_string
@@ -552,6 +575,7 @@ class _DebugTrace(object):
             leave_format.format(
                 self.frame_summary.name,
                 os.path.basename(self.frame_summary.filename),
+                self.frame_summary.lineno,
                 time
             )
         )

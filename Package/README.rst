@@ -94,7 +94,7 @@ Log output contents:
 There are mainly the following functions.
 
 .. list-table:: Function list
-    :widths: 10, 20, 70
+    :widths: 10, 45, 45
     :header-rows: 1
 
     * - Name
@@ -107,8 +107,10 @@ There are mainly the following functions.
         | *Example*:
         | ``_ = debugtrace.enter()``
     * - ``print``
-      - | ``name``: Variable name, etc.
-        | ``value``: Output value
+      - | **name**: Variable name, etc.
+        | **value**: Output value
+        | **output_private**: Output private member if ``True`` (default: ``False``)
+        | **output_method**: Output method if ``True`` (default: ``False``)
       - | Outputs the variable name and value.
         | *Example*:
         | ``debugtrace.print('foo', foo)```
@@ -228,6 +230,11 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-python 1.0.0b6 - Feb. 4, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
 
 ``DebugTrace-python 1.0.0b5 - Feb. 3, 2020``
 ------------------------------------------------

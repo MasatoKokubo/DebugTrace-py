@@ -89,7 +89,7 @@ DebugTrace-python
 主に以下の関数があります。
 
 .. list-table:: 関数一覧
-    :widths: 10, 20, 70
+    :widths: 10, 45, 45
     :header-rows: 1
 
     * - 名 前
@@ -102,11 +102,13 @@ DebugTrace-python
         | *使用例:*
         | ``_ = debugtrace.enter()``
     * - ``print``
-      - | ``name``: 変数名など
-        | ``value``: 出力する値
+      - | **name**: 変数名など
+        | **value**: 出力する値 (省力した場合はnameのみを出力)
+        | **output_private**: ``True`` ならプライベートメンバーを出力する(default: ``False``)
+        | **output_method**: ``True`` ならメソッドを出力する (default: ``False``)
       - | 変数名と値を出力します。
         | *使用例:*
-        | ``debugtrace.print('foo', foo)```
+        | ``debugtrace.print('foo', foo)``
 
 
 5. **debugtrace.ini** ファイルで指定可能なオプション
@@ -222,6 +224,11 @@ MIT ライセンス(MIT)
 
 7. リリースノート
 ==================
+
+``DebugTrace-python 1.0.0b6 - 2020-02-04``
+------------------------------------------
+
+* 改善とバグ修正
 
 ``DebugTrace-python 1.0.0b5 - 2020-02-03``
 ------------------------------------------
