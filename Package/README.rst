@@ -45,6 +45,7 @@ The following is an example of a Python program using DebugTrace-python and a lo
     # Contact class
     class Contact(object):
         def __init__(self, id: int, firstName: str, lastName: str, birthday: datetime.date) -> None:
+            _ = debugtrace.enter(self) # for Debugging
             self.id = id
             self.firstName = firstName
             self.lastName  = lastName
@@ -53,10 +54,10 @@ The following is an example of a Python program using DebugTrace-python and a lo
     def func2():
         _ = debugtrace.enter() # for Debugging
         contact = [
-            Contact(1, "Akane" , "Apple", datetime.date(1991, 2, 3)),
-            Contact(2, "Yukari", "Apple", datetime.date(1992, 3, 4))
+            Contact(1, 'Akane' , 'Apple', datetime.date(1991, 2, 3)),
+            Contact(2, 'Yukari', 'Apple', datetime.date(1992, 3, 4))
         ]
-        debugtrace.print("contact", contact) # for Debugging
+        debugtrace.print('contact', contact) # for Debugging
 
     def func1():
         _ = debugtrace.enter() # for Debugging
@@ -67,26 +68,26 @@ The following is an example of a Python program using DebugTrace-python and a lo
 Log output contents:
 ::
 
-    2020-01-30 23:36:16.598567 DebugTrace-python 1.0.0b4 -> sys.stderr
-    2020-01-30 23:36:16.598652 
-    2020-01-30 23:36:16.601778 Enter func1 (ReadmeExample.py:22)
-    2020-01-30 23:36:16.601956 |   Enter func2 (ReadmeExample.py:14)
-    2020-01-30 23:36:16.602440 |   |   contact = (list)[
-    2020-01-30 23:36:16.602482 |   |     (__main__.Contact){
-    2020-01-30 23:36:16.602517 |   |       birthday: 1991-02-03,
-    2020-01-30 23:36:16.602549 |   |       firstName: (length:5)'Akane',
-    2020-01-30 23:36:16.602586 |   |       id: 1,
-    2020-01-30 23:36:16.602617 |   |       lastName: (length:5)'Apple',
-    2020-01-30 23:36:16.602647 |   |     },
-    2020-01-30 23:36:16.602678 |   |     (__main__.Contact){
-    2020-01-30 23:36:16.602707 |   |       birthday: 1992-03-04,
-    2020-01-30 23:36:16.602738 |   |       firstName: (length:6)'Yukari',
-    2020-01-30 23:36:16.602767 |   |       id: 2,
-    2020-01-30 23:36:16.602797 |   |       lastName: (length:5)'Apple',
-    2020-01-30 23:36:16.602827 |   |     },
-    2020-01-30 23:36:16.602857 |   |   ]
-    2020-01-30 23:36:16.602896 |   Leave func2 (ReadmeExample.py)
-    2020-01-30 23:36:16.602935 Leave func1 (ReadmeExample.py)
+    2020-02-05 00:18:04.783463 DebugTrace-python 1.0.0b7 -> sys.stderr
+    2020-02-05 00:18:04.783553 
+    2020-02-05 00:18:04.785732 Enter func1 (ReadmeExample.py:23)
+    2020-02-05 00:18:04.785863 |   Enter func2 (ReadmeExample.py:15)
+    2020-02-05 00:18:04.785933 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-05 00:18:04.785990 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000008
+    2020-02-05 00:18:04.786110 |   |   
+    2020-02-05 00:18:04.786139 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-05 00:18:04.786163 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000004
+    2020-02-05 00:18:04.786469 |   |   
+    2020-02-05 00:18:04.786495 |   |   contact = (list)[
+    2020-02-05 00:18:04.786511 |   |     (__main__.Contact){
+    2020-02-05 00:18:04.786524 |   |       birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName: (length:5)'Apple'
+    2020-02-05 00:18:04.786598 |   |     }, 
+    2020-02-05 00:18:04.786620 |   |     (__main__.Contact){
+    2020-02-05 00:18:04.786633 |   |       birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName: (length:5)'Apple'
+    2020-02-05 00:18:04.786646 |   |     }
+    2020-02-05 00:18:04.786658 |   |   ]
+    2020-02-05 00:18:04.786679 |   Leave func2 (ReadmeExample.py:15) time: 0:00:00.000783
+    2020-02-05 00:18:04.786701 Leave func1 (ReadmeExample.py:23) time: 0:00:00.000901
 
 4. Functions
 ============
@@ -101,19 +102,24 @@ There are mainly the following functions.
       - Arguments
       - Discription
     * - ``enter``
-      - None
+      - **invoker** (object): Pass the self or cls of the invoker. (Optional)
       - | Outputs an entering log.
         | Also outputs a leaving log at the end of the code block.
-        | *Example*:
+        |
+        | *Examples*:
+        | ``_ = debugtrace.enter(self)``
+        | ``_ = debugtrace.enter(cls)``
         | ``_ = debugtrace.enter()``
     * - ``print``
-      - | **name**: Variable name, etc.
-        | **value**: Output value
-        | **output_private**: Output private member if ``True`` (default: ``False``)
-        | **output_method**: Output method if ``True`` (default: ``False``)
+      - | **name** (str): Variable name, etc.
+        | **value** (object): Output value
+        | **output_private** (bool): Output private member if True (default: False)
+        | **output_method** (bool): Output method if True (default: False)
       - | Outputs the variable name and value.
-        | *Example*:
-        | ``debugtrace.print('foo', foo)```
+        |
+        | *Examples*:
+        | ``debugtrace.print('Hellow')``
+        | ``debugtrace.print('foo', foo)``
 
 
 5. Options that can be specified in the **debugtrace.ini** file
@@ -196,8 +202,9 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - | Format of log output when leaving function or method
         | ``{0}: function or method name``
         | ``{1}: the file name``
-        | ``{2}: the time from entering``
-      - ``{0} ({1}) time: {2}``
+        | ``{2}: the line number``
+        | ``{3}: the time from entering``
+      - ``{0} ({1}:{2}) time: {3}``
     * - ``count_format``
       - Output format of the number of elements such as ``list``, ``tuple``, ``dict`` and etc.
       - ``count:{}``
@@ -230,6 +237,11 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-python 1.0.0b7 - Feb. 5, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
 
 ``DebugTrace-python 1.0.0b6 - Feb. 4, 2020``
 ------------------------------------------------

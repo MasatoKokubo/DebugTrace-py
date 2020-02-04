@@ -5,6 +5,7 @@ import debugtrace # for Debugging
 # Contact class
 class Contact(object):
     def __init__(self, id: int, firstName: str, lastName: str, birthday: datetime.date) -> None:
+        _ = debugtrace.enter(self) # for Debugging
         self.id = id
         self.firstName = firstName
         self.lastName  = lastName

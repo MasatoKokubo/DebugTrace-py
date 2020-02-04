@@ -40,6 +40,7 @@ DebugTrace-python
     # Contact class
     class Contact(object):
         def __init__(self, id: int, firstName: str, lastName: str, birthday: datetime.date) -> None:
+            _ = debugtrace.enter(self) # for Debugging
             self.id = id
             self.firstName = firstName
             self.lastName  = lastName
@@ -48,10 +49,10 @@ DebugTrace-python
     def func2():
         _ = debugtrace.enter() # for Debugging
         contact = [
-            Contact(1, "Akane" , "Apple", datetime.date(1991, 2, 3)),
-            Contact(2, "Yukari", "Apple", datetime.date(1992, 3, 4))
+            Contact(1, 'Akane' , 'Apple', datetime.date(1991, 2, 3)),
+            Contact(2, 'Yukari', 'Apple', datetime.date(1992, 3, 4))
         ]
-        debugtrace.print("contact", contact) # for Debugging
+        debugtrace.print('contact', contact) # for Debugging
 
     def func1():
         _ = debugtrace.enter() # for Debugging
@@ -62,26 +63,26 @@ DebugTrace-python
 ログの出力内容:
 ::
 
-    2020-01-30 23:36:16.598567 DebugTrace-python 1.0.0b4 -> sys.stderr
-    2020-01-30 23:36:16.598652 
-    2020-01-30 23:36:16.601778 Enter func1 (ReadmeExample.py:22)
-    2020-01-30 23:36:16.601956 |   Enter func2 (ReadmeExample.py:14)
-    2020-01-30 23:36:16.602440 |   |   contact = (list)[
-    2020-01-30 23:36:16.602482 |   |     (__main__.Contact){
-    2020-01-30 23:36:16.602517 |   |       birthday: 1991-02-03,
-    2020-01-30 23:36:16.602549 |   |       firstName: (length:5)'Akane',
-    2020-01-30 23:36:16.602586 |   |       id: 1,
-    2020-01-30 23:36:16.602617 |   |       lastName: (length:5)'Apple',
-    2020-01-30 23:36:16.602647 |   |     },
-    2020-01-30 23:36:16.602678 |   |     (__main__.Contact){
-    2020-01-30 23:36:16.602707 |   |       birthday: 1992-03-04,
-    2020-01-30 23:36:16.602738 |   |       firstName: (length:6)'Yukari',
-    2020-01-30 23:36:16.602767 |   |       id: 2,
-    2020-01-30 23:36:16.602797 |   |       lastName: (length:5)'Apple',
-    2020-01-30 23:36:16.602827 |   |     },
-    2020-01-30 23:36:16.602857 |   |   ]
-    2020-01-30 23:36:16.602896 |   Leave func2 (ReadmeExample.py)
-    2020-01-30 23:36:16.602935 Leave func1 (ReadmeExample.py)
+    2020-02-05 00:18:04.783463 DebugTrace-python 1.0.0b7 -> sys.stderr
+    2020-02-05 00:18:04.783553 
+    2020-02-05 00:18:04.785732 Enter func1 (ReadmeExample.py:23)
+    2020-02-05 00:18:04.785863 |   Enter func2 (ReadmeExample.py:15)
+    2020-02-05 00:18:04.785933 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-05 00:18:04.785990 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000008
+    2020-02-05 00:18:04.786110 |   |   
+    2020-02-05 00:18:04.786139 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-05 00:18:04.786163 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000004
+    2020-02-05 00:18:04.786469 |   |   
+    2020-02-05 00:18:04.786495 |   |   contact = (list)[
+    2020-02-05 00:18:04.786511 |   |     (__main__.Contact){
+    2020-02-05 00:18:04.786524 |   |       birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName: (length:5)'Apple'
+    2020-02-05 00:18:04.786598 |   |     }, 
+    2020-02-05 00:18:04.786620 |   |     (__main__.Contact){
+    2020-02-05 00:18:04.786633 |   |       birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName: (length:5)'Apple'
+    2020-02-05 00:18:04.786646 |   |     }
+    2020-02-05 00:18:04.786658 |   |   ]
+    2020-02-05 00:18:04.786679 |   Leave func2 (ReadmeExample.py:15) time: 0:00:00.000783
+    2020-02-05 00:18:04.786701 Leave func1 (ReadmeExample.py:23) time: 0:00:00.000901
 
 4. 関数
 =========================
@@ -96,18 +97,23 @@ DebugTrace-python
       - 引数
       - 説 明
     * - ``enter``
-      - なし
+      - **invoker** (object): 呼び出し元のselfまたはclsを渡します。 (省略可)
       - | 開始ログを出力します。
         | またコードブロックの終了時に終了ログを出力します。
+        |
         | *使用例:*
+        | ``_ = debugtrace.enter(self)``
+        | ``_ = debugtrace.enter(cls)``
         | ``_ = debugtrace.enter()``
     * - ``print``
-      - | **name**: 変数名など
-        | **value**: 出力する値 (省力した場合はnameのみを出力)
-        | **output_private**: ``True`` ならプライベートメンバーを出力する(default: ``False``)
-        | **output_method**: ``True`` ならメソッドを出力する (default: ``False``)
+      - | **name** (str): 変数名など
+        | **value** (object): 出力する値 (省力した場合はnameのみを出力)
+        | **output_private** (bool): Trueならプライベートメンバーを出力する(default: False)
+        | **output_method** (bool): Trueならメソッドを出力する (default: False)
       - | 変数名と値を出力します。
+        |
         | *使用例:*
+        | ``debugtrace.print('Hellow')``
         | ``debugtrace.print('foo', foo)``
 
 
@@ -190,8 +196,9 @@ DebugTrace-python は、カレントディレクトリにある ``debugtrace.ini
       - | 関数またはメソッドを出る際に出力するログのフォーマット
         | ``{0}: 関数名またはメソッド名``
         | ``{1}: ファイル名``
-        | ``{2}: 処理時間``
-      - ``{0} ({1}) time: {2}``
+        | ``{2}: 行番号``
+        | ``{3}: 処理時間``
+      - ``{0} ({1}:{2}) time: {3}``
     * - ``count_format``
       - ``list``, ``tuple``, ``dict`` 等の要素数の出力フィーマット
       - ``count:{}``
@@ -224,6 +231,11 @@ MIT ライセンス(MIT)
 
 7. リリースノート
 ==================
+
+``DebugTrace-python 1.0.0b7 - 2020-02-05``
+------------------------------------------
+
+* 改善とバグ修正
 
 ``DebugTrace-python 1.0.0b6 - 2020-02-04``
 ------------------------------------------

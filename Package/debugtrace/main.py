@@ -540,15 +540,26 @@ class _DebugTrace(object):
     Japanese:
     初期化時に開始ログを出力し、削除時に終了ログを出力します。
     '''
-    __slots__ = ['frame_summary', 'enter_time']
+    __slots__ = ['name', 'filename', 'lineno', 'enter_time']
     
-    def __init__(self):
+    def __init__(self, invoker: object):
         if not is_enabled: return
+
+        if isinstance(invoker, type(None)):
+            self.name = ''
+        else:
+            self.name = type(invoker).__name__
+            if self.name == 'type':
+                self.name = invoker.__name__
+            self.name += '.'
 
         try:
             raise RuntimeError
         except RuntimeError:
-            self.frame_summary = traceback.extract_stack(limit=3)[0]
+            frame_summary = traceback.extract_stack(limit=3)[0]
+            self.name += frame_summary.name
+            self.filename = os.path.basename(frame_summary.filename)
+            self.lineno = frame_summary.lineno
 
         indent_string = _get_indent_string()
         if _code_nest_level < _previous_nest_level:
@@ -556,11 +567,7 @@ class _DebugTrace(object):
 
         _logger.print(indent_string +
             enter_string + ' ' +
-            enter_format.format(
-                self.frame_summary.name,
-                os.path.basename(self.frame_summary.filename),
-                self.frame_summary.lineno
-            )
+            enter_format.format(self.name, self.filename, self.lineno)
         )
         _up_nest()
         self.enter_time = datetime.datetime.now()
@@ -572,15 +579,10 @@ class _DebugTrace(object):
         _down_nest()
         _logger.print(_get_indent_string() +
             leave_string + ' ' +
-            leave_format.format(
-                self.frame_summary.name,
-                os.path.basename(self.frame_summary.filename),
-                self.frame_summary.lineno,
-                time
-            )
+            leave_format.format(self.name, self.filename, self.lineno, time)
         )
 
-def enter():
+def enter(invoker: object=None):
     '''
     By calling this method when entering an execution block such as a function or method,
     outputs a entering log.
@@ -590,12 +592,16 @@ def enter():
     Japanese:
     関数やメソッドなどの実行ブロックに入る際にこのメソッドを呼び出す事で、開始のログを出力します。
     戻り値は何かの変数(例えば _)に格納してください。この変数のスコープを出る際に終了のログを出力します。
+
+    Args
+        invoker: The object or class that invoked this method.
+            Japanese: このメソッドを呼び出したオブジェクトまたはクラス。
     
     Returns:
         An inner class object.
         Japanese: 内部クラスのオブジェクト。
     '''
-    return _DebugTrace()
+    return _DebugTrace(invoker)
 
 if is_enabled:
     from debugtrace import version
