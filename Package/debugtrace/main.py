@@ -173,13 +173,15 @@ def _get_data_indent_string() -> str:
         _data_nest_level
     ]
 
-def _to_strings(value: object,
+def _to_strings(name: str,
+        value: object,
         output_private: bool,
         output_method: bool) -> list:
     strings = []
+    string = name + varname_value_separator if name != '' else ''
     if isinstance(value, type(None)):
         # None
-        strings.append('None')
+        string += 'None'
     elif isinstance(value, str):
         # str
         has_single_quote = False
@@ -228,15 +230,15 @@ def _to_strings(value: object,
         double_quote_str += '"'
         single_quote_str += "'"
         if has_single_quote and not has_double_quote:
-            strings.append(double_quote_str)
+            string += double_quote_str
         else:
-            strings.append(single_quote_str)
+            string += single_quote_str
 
     elif isinstance(value, int) or isinstance(value, float) or \
         isinstance(value, datetime.date) or isinstance(value, datetime.time) or \
         isinstance(value, datetime.datetime):
         # int, float, datetime.date, datetime.time, datetime.datetime
-        strings.append(str(value))
+        string += str(value)
 
     elif isinstance(value, list) or \
             isinstance(value, set) or isinstance(value, frozenset) or \
@@ -247,7 +249,7 @@ def _to_strings(value: object,
 
     elif _has_str_method(value):
         # has __str__ method
-        strings.append(str(value))
+        string += str(value)
 
     else:
         # use refrection
@@ -262,6 +264,11 @@ def _to_strings(value: object,
             strings = _to_strings_using_refrection(value, output_private, output_method)
             _reflected_objects.pop()
 
+    if len(string) > 0:
+        if len(strings) > 0:
+            strings[0] = string + strings[0]
+        else:
+            strings.append(string)
     return strings
 
 def _to_strings_using_refrection(value: object,
@@ -294,7 +301,7 @@ def _to_strings_using_refrection(value: object,
     string_backup = string
     for member in members:
         name = member[0]
-        value_strings = _to_strings(member[1], output_private, output_method)
+        value_strings = _to_strings('', member[1], output_private, output_method)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line value strings
@@ -380,7 +387,7 @@ def _to_strings_iterator(values: object,
             value_strings = _to_strings_keyvalue(element, values[element], output_private, output_method)
         else:
             # list, set, frozenset or tuple
-            value_strings = _to_strings(element, output_private, output_method)
+            value_strings = _to_strings('', element, output_private, output_method)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line element strings
@@ -433,8 +440,8 @@ def _to_strings_keyvalue(key: object, value: object,
 
     strings = []
     string = ''
-    key_strings = _to_strings(key, output_private, output_method)
-    value_strings = _to_strings(value, output_private, output_method)
+    key_strings = _to_strings('', key, output_private, output_method)
+    value_strings = _to_strings('', value, output_private, output_method)
 
     # key
     indent_string = _get_data_indent_string()
@@ -498,11 +505,11 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         value: The value to output if not omitted
             Japanese: 出力する値 (省略されていなければ)
 
-        output_private: Output private member if True
-            Japanese: Trueならプライベートメンバーを出力する
+        output_private: Outputs private member if True
+            Japanese: Trueならプライベートメンバーも出力する
 
-        output_method: Output method if True
-            Japanese:  Trueならメソッドを出力する
+        output_method: Outputs method if True
+            Japanese:  Trueならメソッドも出力する
     '''
     global _data_nest_level
     global _last_print_strings
@@ -518,19 +525,13 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         _logger.print(indent_string + name)
     else:
         last_print_lines = len(_last_print_strings)
-        _last_print_strings = _to_strings(value, output_private, output_method)
+        _last_print_strings = _to_strings(name, value, output_private, output_method)
 
-        if last_print_lines > 1 or len(_last_print_strings) > 1:
+        if last_print_lines > 0 and (last_print_lines > 1 or len(_last_print_strings)) > 1:
             _logger.print(indent_string)
 
-        first_line = True
-        for value_string in _last_print_strings:
-            line = indent_string
-            if  first_line:
-                line += name + varname_value_separator
-            line += value_string
-            _logger.print(line)
-            first_line = False
+        for string in _last_print_strings:
+            _logger.print(indent_string + string)
 
 class _DebugTrace(object):
     '''
@@ -543,6 +544,8 @@ class _DebugTrace(object):
     __slots__ = ['name', 'filename', 'lineno', 'enter_time']
     
     def __init__(self, invoker: object):
+        global _last_print_strings
+
         if not is_enabled: return
 
         if isinstance(invoker, type(None)):
@@ -570,6 +573,8 @@ class _DebugTrace(object):
             enter_format.format(self.name, self.filename, self.lineno)
         )
         _up_nest()
+        _last_print_strings = []
+
         self.enter_time = datetime.datetime.now()
 
     def __del__(self):

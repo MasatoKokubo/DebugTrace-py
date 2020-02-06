@@ -238,6 +238,11 @@ MIT License (MIT)
 7. Release notes
 ================
 
+``DebugTrace-python 1.0.0b8 - Feb. 7, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
+
 ``DebugTrace-python 1.0.0b7 - Feb. 5, 2020``
 ------------------------------------------------
 
