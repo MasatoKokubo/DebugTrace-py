@@ -220,14 +220,20 @@ You can specify the following options in the ``debugtrace.ini`` file.
     * - ``maximum_data_output_width``
       - Maximum output width of data
       - ``80``
+    * - ``bytes_count_in_line``
+      - Count in line of ``bytes``
+      - ``16``
     * - ``collection_limit``
-      - Maximum number of elements to output such as ``list``, ``tuple``, ``dict`` and etc.
+      - Limit of elements to output such as ``list``, ``tuple``, ``dict`` and etc.
       - ``256``
     * - ``string_limit``
-      - Maximum number of output characters for string values
+      - Limit of output characters for string values
       - ``2048``
+    * - ``bytes_limit``
+      - Limit of output ``bytes``
+      - ``512``
     * - ``reflection_nest_limit``
-      - Maximum number of reflection nests
+      - Limit of reflection nests
       - ``4``
 
 6. License
@@ -237,6 +243,11 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-python 1.0.0b9 - Feb. 9, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
 
 ``DebugTrace-python 1.0.0b8 - Feb. 7, 2020``
 ------------------------------------------------
