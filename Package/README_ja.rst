@@ -199,7 +199,7 @@ DebugTrace-python は、カレントディレクトリにある ``debugtrace.ini
         | ``{3}: 処理時間``
       - ``{0} ({1}:{2}) time: {3}``
     * - ``count_format``
-      - ``list``, ``tuple``, ``dict`` 等の要素数の出力フィーマット
+      - ``list``, ``tuple``, ``dict`` 等の要素数の出力フォーマット
       - ``count:{}``
     * - ``minimum_output_count``
       - ``list``, ``tuple``, ``dict`` 等の要素数を出力する最小値
