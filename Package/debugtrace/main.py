@@ -54,8 +54,8 @@ _enter_format                 = _get_config_value('enter_format'                
 _leave_format                 = _get_config_value('leave_format'                , '{0} ({1}:{2}) time: {3}' )
 _count_format                 = _get_config_value('count_format'                , 'count:{}'                )
 _minimum_output_count         = _get_config_value('minimum_output_count'        , 5                         )
-_string_length_format         = _get_config_value('string_length_format'        , 'length:{}'               )
-_minimum_output_string_length = _get_config_value('minimum_output_string_length', 5                         )
+_length_format                = _get_config_value('length_format'               , 'length:{}'               )
+_minimum_output_length        = _get_config_value('minimum_output_length'       , 5                         )
 _maximum_data_output_width    = _get_config_value('maximum_data_output_width'   , 80                        )
 _bytes_count_in_line          = _get_config_value('bytes_count_in_line'         , 16                        )
 _collection_limit             = _get_config_value('collection_limit'            , 256                       )
@@ -123,8 +123,6 @@ elif _logger_name == 'logger':
 else:
     pr._print('debugtrace: (' + _config_path + ') logger = ' + _logger_name + ' (Unknown)', sys.stderr)
 
-_code_indent_strings = []
-_data_indent_strings = []
 _code_nest_level     = 0
 _previous_nest_level = 0
 _data_nest_level     = 0
@@ -146,30 +144,10 @@ def _down_nest() -> None:
     _code_nest_level -= 1
 
 def _get_indent_string() -> str:
-    global _code_indent_strings
-
-    if len(_code_indent_strings) == 0:
-        _code_indent_strings = \
-            [_code_indent_string * index for index in range(0, _maximum_indents)]
-
-    return _code_indent_strings[
-        0 if (_code_nest_level < 0) else
-        len(_code_indent_strings) - 1 if (_code_nest_level >= len(_code_indent_strings)) else
-        _code_nest_level
-    ]
+    return _code_indent_string * min(max(0, _code_nest_level), _maximum_indents)
 
 def _get_data_indent_string() -> str:
-    global _data_indent_strings
-
-    if len(_data_indent_strings) == 0:
-        _data_indent_strings = \
-            [_data_indent_string * index for index in range(0, _maximum_indents)]
-
-    return _data_indent_strings[
-        0 if (_data_nest_level < 0) else
-        len(_data_indent_strings) - 1 if (_data_nest_level >= len(_data_indent_strings)) else
-        _data_nest_level
-    ]
+    return _data_indent_string * min(max(0, _data_nest_level), _maximum_indents)
 
 def _to_strings(name: str,
         value: object,
@@ -203,23 +181,29 @@ def _to_strings(name: str,
         # list, set, frozenset, tuple, dict
         strings = _to_strings_iterator(value, force_reflection, output_private, output_method)
 
-    elif not force_reflection and _has_str_method(value):
-        # has __str__ method
-        string += 'str(): '
-        string += str(value)
-
     else:
-        # use refrection
-        if any(map(lambda obj: value is obj, _reflected_objects)):
-            # cyclic reference
-            strings.append(_cyclic_reference_string)
-        elif len(_reflected_objects) > _reflection_nest_limit:
-            # over reflection level limitation
-            strings.append(_limit_string)
+        has_str, has_repr = _has_str_repr_method(value)
+        if not force_reflection and (has_str or has_repr):
+            # has __str__ or __repr__ method
+            if has_repr:
+                string += 'repr(): '
+                string += repr(value)
+            else:
+                string += 'str(): '
+                string += str(value)
+
         else:
-            _reflected_objects.append(value)
-            strings = _to_strings_using_refrection(value, force_reflection, output_private, output_method)
-            _reflected_objects.pop()
+            # use refrection
+            if any(map(lambda obj: value is obj, _reflected_objects)):
+                # cyclic reference
+                strings.append(_cyclic_reference_string)
+            elif len(_reflected_objects) > _reflection_nest_limit:
+                # over reflection level limitation
+                strings.append(_limit_string)
+            else:
+                _reflected_objects.append(value)
+                strings = _to_strings_using_refrection(value, force_reflection, output_private, output_method)
+                _reflected_objects.pop()
 
     if len(string) > 0:
         if len(strings) > 0:
@@ -231,9 +215,11 @@ def _to_strings(name: str,
 def _to_strings_str(value: str) -> list:
     has_single_quote = False
     has_double_quote = False
-    single_quote_str = \
-        '(' + _string_length_format.format(len(value)) + ')' if len(value) >= _minimum_output_string_length \
-        else ''
+    single_quote_str = ''
+    if len(value) >= _minimum_output_length:
+        single_quote_str += '('
+        single_quote_str += _length_format.format(len(value))
+        single_quote_str += ')'
     double_quote_str = single_quote_str
     single_quote_str += "'"
     double_quote_str += '"'
@@ -282,16 +268,15 @@ def _to_strings_bytes(value: bytes) -> list:
     global _data_nest_level
     global _bytes_limit
 
-    print('_bytes_limit', _bytes_limit)
-
     bytes_length = len(value)
     strings = []
     string = '('
     if type(value) == bytes:
-        string = '(bytes '
+        string += 'bytes '
     elif type(value) == bytearray:
-        string = '(bytearray '
-    string += _count_format.format(str(bytes_length))
+        string += 'bytearray '
+    if bytes_length >= _minimum_output_length:
+        string += _length_format.format(bytes_length)
     string += ')['
     chars = ''
 
@@ -566,10 +551,13 @@ def _get_simple_type_name(value_type: type, nest: int) -> str:
 
     return type_name
 
-def _has_str_method(value: object) -> bool:
+def _has_str_repr_method(value: object) -> (bool, bool):
     try:
         members = inspect.getmembers(value, lambda v: inspect.ismethod(v))
-        return len([member for member in members if member[0] == '__str__']) != 0
+        return (
+            len([member for member in members if member[0] == '__str__']) != 0,
+            len([member for member in members if member[0] == '__repr__']) != 0
+        )
     except:
         return False
 

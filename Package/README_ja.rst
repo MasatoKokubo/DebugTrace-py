@@ -63,26 +63,25 @@ DebugTrace-python
 ログの出力内容:
 ::
 
-    2020-02-05 00:18:04.783463 DebugTrace-python 1.0.0b7 -> sys.stderr
-    2020-02-05 00:18:04.783553 
-    2020-02-05 00:18:04.785732 Enter func1 (ReadmeExample.py:23)
-    2020-02-05 00:18:04.785863 |   Enter func2 (ReadmeExample.py:15)
-    2020-02-05 00:18:04.785933 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-02-05 00:18:04.785990 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000008
-    2020-02-05 00:18:04.786110 |   |   
-    2020-02-05 00:18:04.786139 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-02-05 00:18:04.786163 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000004
-    2020-02-05 00:18:04.786469 |   |   
-    2020-02-05 00:18:04.786495 |   |   contact = (list)[
-    2020-02-05 00:18:04.786511 |   |     (__main__.Contact){
-    2020-02-05 00:18:04.786524 |   |       birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName: (length:5)'Apple'
-    2020-02-05 00:18:04.786598 |   |     }, 
-    2020-02-05 00:18:04.786620 |   |     (__main__.Contact){
-    2020-02-05 00:18:04.786633 |   |       birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName: (length:5)'Apple'
-    2020-02-05 00:18:04.786646 |   |     }
-    2020-02-05 00:18:04.786658 |   |   ]
-    2020-02-05 00:18:04.786679 |   Leave func2 (ReadmeExample.py:15) time: 0:00:00.000783
-    2020-02-05 00:18:04.786701 Leave func1 (ReadmeExample.py:23) time: 0:00:00.000901
+    2020-02-11 20:53:08.082640 DebugTrace-python 1.0.0b10 -> sys.stderr
+    2020-02-11 20:53:08.082744 
+    2020-02-11 20:53:08.085611 Enter func1 (ReadmeExample.py:23)
+    2020-02-11 20:53:08.085774 |   Enter func2 (ReadmeExample.py:15)
+    2020-02-11 20:53:08.085896 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-11 20:53:08.085958 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000008
+    2020-02-11 20:53:08.086038 |   |   
+    2020-02-11 20:53:08.086077 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-02-11 20:53:08.086123 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000004
+    2020-02-11 20:53:08.086474 |   |   contact = (list)[
+    2020-02-11 20:53:08.086516 |   |     (__main__.Contact){
+    2020-02-11 20:53:08.086533 |   |       birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName: (length:5)'Apple'
+    2020-02-11 20:53:08.086560 |   |     }, 
+    2020-02-11 20:53:08.086591 |   |     (__main__.Contact){
+    2020-02-11 20:53:08.086605 |   |       birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName: (length:5)'Apple'
+    2020-02-11 20:53:08.086613 |   |     }
+    2020-02-11 20:53:08.086638 |   |   ]
+    2020-02-11 20:53:08.086680 |   Leave func2 (ReadmeExample.py:15) time: 0:00:00.000851
+    2020-02-11 20:53:08.086724 Leave func1 (ReadmeExample.py:23) time: 0:00:00.001032
 
 4. 関数
 =========================
@@ -205,11 +204,11 @@ DebugTrace-python は、カレントディレクトリにある ``debugtrace.ini
     * - ``minimum_output_count``
       - ``list``, ``tuple``, ``dict`` 等の要素数を出力する最小値
       - ``5``
-    * - ``string_length_format``
-      - 文字列長の出力フォーマット
+    * - ``length_format``
+      - 文字列, ``bytes`` の要素数の出力フォーマット
       - ``length:{}``
-    * - ``minimum_output_string_length``
-      - 文字列長を出力する最小値
+    * - ``minimum_output_length``
+      - 文字列, ``bytes`` の要素数を出力する最小値
       - ``5``
     * - ``maximum_data_output_width``
       - データの出力幅の最大値
@@ -237,6 +236,11 @@ MIT ライセンス(MIT)
 
 7. リリースノート
 ==================
+
+``DebugTrace-python 1.0.0b10 - 2020-02-11``
+------------------------------------------
+
+* 改善とバグ修正
 
 ``DebugTrace-python 1.0.0b9 - 2020-02-09``
 ------------------------------------------
