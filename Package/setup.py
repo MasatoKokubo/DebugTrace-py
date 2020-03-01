@@ -25,7 +25,7 @@ version = next((line.split('=')[1].strip().replace("'", '')
 setup(
     name="debugtrace",
     version=version,
-    url='https://github.com/MasatoKokubo/DebugTrace-python',
+    url='https://github.com/MasatoKokubo/DebugTrace-py',
     author='Masato Kokubo',
     author_email='masatokokubo@gmail.com',
     maintainer='Masato Kokubo',

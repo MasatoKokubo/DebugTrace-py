@@ -11,8 +11,6 @@ import sys
 import traceback
 from debugtrace import _print as pr
 
-_DO_NOT_OUTPUT = 'Do not output'
-
 _config_path = './' + __package__ + '.ini'
 _config = configparser.ConfigParser()
 if os.path.exists(_config_path):
@@ -39,19 +37,17 @@ _logging_config_file          = _get_config_value('logging_config_file'         
 _logging_logger_name          = _get_config_value('logging_logger_name'         , __package__               )
 _logging_level                = _get_config_value('logging_level'               , 'DEBUG'                   ).upper()
 _is_enabled                   = _get_config_value('is_enabled'                  , True                      )
-_enter_string                 = _get_config_value('enter_string'                , 'Enter'                   )
-_leave_string                 = _get_config_value('leave_string'                , 'Leave'                   )
+_enter_format                 = _get_config_value('enter_format'                , 'Enter {0} ({1}:{2})'     )
+_leave_format                 = _get_config_value('leave_format'                , 'Leave {0} ({1}:{2}) time: {3}')
 _limit_string                 = _get_config_value('limit_string'                , '...'                     )
 _maximum_indents              = _get_config_value('maximum_indents'             , 20                        )
-_code_indent_string           = _get_config_value('code_indent_string'          , '|   '                    )
+_indent_string                = _get_config_value('indent_string'               , '|   '                    )
 _data_indent_string           = _get_config_value('data_indent_string'          , '  '                      )
 _non_output_string            = _get_config_value('non_output_string'           , '...'                     )
 _cyclic_reference_string      = _get_config_value('cyclic_reference_string'     , '*** Cyclic Reference ***')
 _varname_value_separator      = _get_config_value('varname_value_separator'     , ' = '                     )
 _key_value_separator          = _get_config_value('key_value_separator'         , ': '                      )
 _log_datetime_format          = _get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f'    )
-_enter_format                 = _get_config_value('enter_format'                , '{0} ({1}:{2})'           )
-_leave_format                 = _get_config_value('leave_format'                , '{0} ({1}:{2}) time: {3}' )
 _count_format                 = _get_config_value('count_format'                , 'count:{}'                )
 _minimum_output_count         = _get_config_value('minimum_output_count'        , 5                         )
 _length_format                = _get_config_value('length_format'               , 'length:{}'               )
@@ -62,6 +58,28 @@ _collection_limit             = _get_config_value('collection_limit'            
 _string_limit                 = _get_config_value('string_limit'                , 2048                      )
 _bytes_limit                  = _get_config_value('bytes_limit'                 , 512                       )
 _reflection_nest_limit        = _get_config_value('reflection_nest_limit'       , 4                         )
+
+class _PrintOptions(object):
+    def __init__(self,
+        force_reflection: bool,
+        output_private: bool,
+        output_method: bool,
+        collection_limit: int,
+        string_limit: int,
+        bytes_limit: int,
+        reflection_nest_limit:int
+        ) -> None:
+        global _collection_limit
+        global _string_limit
+        global _bytes_limit
+        global _reflection_nest_limit
+        self.force_reflection = force_reflection
+        self.output_private   = output_private
+        self.output_method    = output_method
+        self.collection_limit      = _collection_limit      if collection_limit      is None else collection_limit     
+        self.string_limit          = _string_limit          if string_limit          is None else string_limit         
+        self.bytes_limit           = _bytes_limit           if bytes_limit           is None else bytes_limit          
+        self.reflection_nest_limit = _reflection_nest_limit if reflection_nest_limit is None else reflection_nest_limit
 
 class _LoggerBase(object):
     @abstractmethod
@@ -123,50 +141,44 @@ elif _logger_name == 'logger':
 else:
     pr._print('debugtrace: (' + _config_path + ') logger = ' + _logger_name + ' (Unknown)', sys.stderr)
 
-_code_nest_level     = 0
+_nest_level = 0
 _previous_nest_level = 0
-_data_nest_level     = 0
-_last_print_strings  = []
-_reflected_objects   = []
+_data_nest_level    = 0
+_last_print_strings = []
+_reflected_objects  = []
 
 def _up_nest() -> None:
+    global _nest_level
     global _previous_nest_level
-    global _code_nest_level
-
-    _previous_nest_level = _code_nest_level
-    _code_nest_level += 1
+    _previous_nest_level = _nest_level
+    _nest_level += 1
 
 def _down_nest() -> None:
+    global _nest_level
     global _previous_nest_level
-    global _code_nest_level
-
-    _previous_nest_level = _code_nest_level
-    _code_nest_level -= 1
+    _previous_nest_level = _nest_level
+    _nest_level -= 1
 
 def _get_indent_string() -> str:
-    return _code_indent_string * min(max(0, _code_nest_level), _maximum_indents)
+    return _indent_string * min(max(0, _nest_level), _maximum_indents)
 
 def _get_data_indent_string() -> str:
     return _data_indent_string * min(max(0, _data_nest_level), _maximum_indents)
 
-def _to_strings(name: str,
-        value: object,
-        force_reflection: bool,
-        output_private: bool,
-        output_method: bool) -> list:
+def _to_strings(name: str, value: object, printOptions: _PrintOptions) -> list:
     strings = []
     string = name + _varname_value_separator if name != '' else ''
-    if isinstance(value, type(None)):
+    if value is None:
         # None
         string += 'None'
 
     elif isinstance(value, str):
         # str
-        strings = _to_strings_str(value)
+        strings = _to_strings_str(value, printOptions)
 
     elif isinstance(value, bytes) or isinstance(value, bytearray):
-        # str
-        strings = _to_strings_bytes(value)
+        # bytes
+        strings = _to_strings_bytes(value, printOptions)
 
     elif isinstance(value, int) or isinstance(value, float) or \
         isinstance(value, datetime.date) or isinstance(value, datetime.time) or \
@@ -179,11 +191,11 @@ def _to_strings(name: str,
             isinstance(value, tuple) or \
             isinstance(value, dict):
         # list, set, frozenset, tuple, dict
-        strings = _to_strings_iterator(value, force_reflection, output_private, output_method)
+        strings = _to_strings_iterator(value, printOptions)
 
     else:
         has_str, has_repr = _has_str_repr_method(value)
-        if not force_reflection and (has_str or has_repr):
+        if not printOptions.force_reflection and (has_str or has_repr):
             # has __str__ or __repr__ method
             if has_repr:
                 string += 'repr(): '
@@ -197,12 +209,12 @@ def _to_strings(name: str,
             if any(map(lambda obj: value is obj, _reflected_objects)):
                 # cyclic reference
                 strings.append(_cyclic_reference_string)
-            elif len(_reflected_objects) > _reflection_nest_limit:
+            elif len(_reflected_objects) > printOptions.reflection_nest_limit:
                 # over reflection level limitation
                 strings.append(_limit_string)
             else:
                 _reflected_objects.append(value)
-                strings = _to_strings_using_refrection(value, force_reflection, output_private, output_method)
+                strings = _to_strings_using_refrection(value, printOptions)
                 _reflected_objects.pop()
 
     if len(string) > 0:
@@ -212,7 +224,7 @@ def _to_strings(name: str,
             strings.append(string)
     return strings
 
-def _to_strings_str(value: str) -> list:
+def _to_strings_str(value: str, printOptions: _PrintOptions) -> list:
     has_single_quote = False
     has_double_quote = False
     single_quote_str = ''
@@ -225,7 +237,7 @@ def _to_strings_str(value: str) -> list:
     double_quote_str += '"'
     count = 1
     for char in value:
-        if count > _string_limit:
+        if count > printOptions.string_limit:
             single_quote_str += _limit_string
             double_quote_str += _limit_string
             break
@@ -264,7 +276,7 @@ def _to_strings_str(value: str) -> list:
         return [double_quote_str]
     return [single_quote_str]
 
-def _to_strings_bytes(value: bytes) -> list:
+def _to_strings_bytes(value: bytes, printOptions: _PrintOptions) -> list:
     global _data_nest_level
     global _bytes_limit
 
@@ -272,10 +284,11 @@ def _to_strings_bytes(value: bytes) -> list:
     strings = []
     string = '('
     if type(value) == bytes:
-        string += 'bytes '
+        string += 'bytes'
     elif type(value) == bytearray:
-        string += 'bytearray '
+        string += 'bytearray'
     if bytes_length >= _minimum_output_length:
+        string += ' '
         string += _length_format.format(bytes_length)
     string += ')['
     chars = ''
@@ -294,7 +307,7 @@ def _to_strings_bytes(value: bytes) -> list:
                 chars = ''
         else:
             string += ' '
-        if (count >= _bytes_limit):
+        if (count >= printOptions.bytes_limit):
             string += _limit_string
             break
         string += '{:02X}'.format(element)
@@ -317,22 +330,19 @@ def _to_strings_bytes(value: bytes) -> list:
 
     return strings
 
-def _to_strings_using_refrection(value: object,
-        force_reflection: bool,
-        output_private: bool,
-        output_method: bool) -> list:
+def _to_strings_using_refrection(value: object, printOptions: _PrintOptions) -> list:
     global _data_nest_level
 
     members = []
     try:
         base_members = inspect.getmembers(value,
             lambda v: not inspect.isclass(v) and
-                (output_method or not inspect.ismethod(v)) and
+                (printOptions.output_method or not inspect.ismethod(v)) and
                 not inspect.isbuiltin(v))
 
         members = [m for m in base_members
                 if (not m[0].startswith('__') or not m[0].endswith('__')) and
-                    (output_private or not m[0].startswith('_'))]
+                    (printOptions.output_private or not m[0].startswith('_'))]
     except BaseException as ex:
         return [str(ex)]
 
@@ -348,7 +358,7 @@ def _to_strings_using_refrection(value: object,
     string_backup = string
     for member in members:
         name = member[0]
-        value_strings = _to_strings('', member[1], force_reflection, output_private, output_method)
+        value_strings = _to_strings('', member[1], printOptions)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line value strings
@@ -397,10 +407,7 @@ def _to_strings_using_refrection(value: object,
 
     return strings
 
-def _to_strings_iterator(values: object,
-        force_reflection: bool,
-        output_private: bool,
-        output_method: bool) -> list:
+def _to_strings_iterator(values: object, printOptions: _PrintOptions) -> list:
     global _data_nest_level
 
     open_char = '{' # set, frozenset, dict
@@ -425,17 +432,17 @@ def _to_strings_iterator(values: object,
     line_breaked = False
     string_backup = string
     for element in values:
-        if element_index >= _collection_limit:
+        if element_index >= printOptions.collection_limit:
             string += _limit_string
             break
 
         value_strings = []
         if isinstance(values, dict):
             # dictionary
-            value_strings = _to_strings_keyvalue(element, values[element], force_reflection, output_private, output_method)
+            value_strings = _to_strings_keyvalue(element, values[element], printOptions)
         else:
             # list, set, frozenset or tuple
-            value_strings = _to_strings('', element, force_reflection, output_private, output_method)
+            value_strings = _to_strings('', element, printOptions)
 
         if not line_breaked and len(value_strings) > 1:
             # multi line element strings
@@ -481,16 +488,13 @@ def _to_strings_iterator(values: object,
 
     return strings
 
-def _to_strings_keyvalue(key: object, value: object,
-        force_reflection: bool,
-        output_private: bool,
-        output_method: bool) -> list:
+def _to_strings_keyvalue(key: object, value: object, printOptions: _PrintOptions) -> list:
     global _data_nest_level
 
     strings = []
     string = ''
-    key_strings = _to_strings('', key, force_reflection, output_private, output_method)
-    value_strings = _to_strings('', value, force_reflection, output_private, output_method)
+    key_strings = _to_strings('', key, printOptions)
+    value_strings = _to_strings('', value, printOptions)
 
     # key
     indent_string = _get_data_indent_string()
@@ -561,10 +565,17 @@ def _has_str_repr_method(value: object) -> (bool, bool):
     except:
         return False
 
+_DO_NOT_OUTPUT = 'Do not output'
+
 def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         force_reflection: bool = False,
         output_private: bool = False,
-        output_method: bool = False) -> None:
+        output_method: bool = False,
+        collection_limit: int = None,
+        string_limit: int = None,
+        bytes_limit: int = None,
+        reflection_nest_limit: int = None
+        ) -> None:
     '''
     Outputs the name and value.
 
@@ -574,6 +585,10 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         force_reflection: If true, uses reflection even if __str__ method is defined
         output_private: Outputs private member if true
         output_method: Outputs method if true
+        collection_limit: Output limit of elements such as list, tuple, dict
+        string_limit: Output limit of string elements
+        bytes_limit: Output limit of bytes elements
+        reflection_nest_limit: Limit of reflection nests
 
     The following is in Japanese.
     
@@ -585,6 +600,10 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         force_reflection: Trueなら __str__ メソッドが定義されていてもリフレクションを使用する
         output_private: Trueならプライベートメンバーも出力する
         output_method: Trueならメソッドも出力する
+        collection_limit: list, tuple, dict等の要素の出力数の制限
+        string_limit: 文字列値の出力文字数の制限
+        bytes_limit: bytesの内容の出力数の制限
+        reflection_nest_limit: リフレクションのネスト数の制限
     '''
     global _data_nest_level
     global _last_print_strings
@@ -599,8 +618,11 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
     if value is _DO_NOT_OUTPUT:
         _logger.print(indent_string + name)
     else:
+        printOptions = _PrintOptions(
+            force_reflection, output_private, output_method,
+            collection_limit, string_limit, bytes_limit, reflection_nest_limit)
         last_print_lines = len(_last_print_strings)
-        _last_print_strings = _to_strings(name, value, force_reflection, output_private, output_method)
+        _last_print_strings = _to_strings(name, value, printOptions)
 
         if last_print_lines > 0 and (last_print_lines > 1 or len(_last_print_strings)) > 1:
             _logger.print(indent_string)
@@ -619,12 +641,14 @@ class _DebugTrace(object):
     '''
     __slots__ = ['name', 'filename', 'lineno', 'enter_time']
     
-    def __init__(self, invoker: object):
+    def __init__(self, invoker: object) -> None:
+        global _nest_level
+        global _previous_nest_level
         global _last_print_strings
 
         if not _is_enabled: return
 
-        if isinstance(invoker, type(None)):
+        if invoker is None:
             self.name = ''
         else:
             self.name = type(invoker).__name__
@@ -641,11 +665,10 @@ class _DebugTrace(object):
             self.lineno = frame_summary.lineno
 
         indent_string = _get_indent_string()
-        if _code_nest_level < _previous_nest_level:
+        if _nest_level < _previous_nest_level:
             _logger.print(indent_string)
 
         _logger.print(indent_string +
-            _enter_string + ' ' +
             _enter_format.format(self.name, self.filename, self.lineno)
         )
         _up_nest()
@@ -657,13 +680,13 @@ class _DebugTrace(object):
         if not _is_enabled: return
 
         time = datetime.datetime.now() - self.enter_time
+
         _down_nest()
         _logger.print(_get_indent_string() +
-            _leave_string + ' ' +
             _leave_format.format(self.name, self.filename, self.lineno, time)
         )
 
-def enter(invoker: object=None):
+def enter(invoker: object=None) -> _DebugTrace:
     '''
     By calling this method when entering an execution block such as a function or method,
     outputs a entering log.
