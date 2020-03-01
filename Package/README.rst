@@ -156,12 +156,19 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - | ``False: Log output is disabled``
         | ``True: Log output is enabled``
       - ``True``
-    * - ``enter_string``
-      - String to be output when entering functions and methods
-      - ``Enter``
-    * - ``leave_string``
-      - String to output when leaving functions and methods
-      - ``Leave``
+    * - ``enter_format``
+      - | Format of the log output when entering function or method
+        | ``{0}: the function or method name``
+        | ``{1}: the file name``
+        | ``{2}: the line number``
+      - ``Enter {0} ({1}:{2})``
+    * - ``leave_format``
+      - | Format of log output when leaving function or method
+        | ``{0}: function or method name``
+        | ``{1}: the file name``
+        | ``{2}: the line number``
+        | ``{3}: the time from entering``
+      - ``Leave {0} ({1}:{2}) time: {3}``
     * - ``limit_string``
       - String output when limit is exceeded
       - ``...``
@@ -191,19 +198,6 @@ You can specify the following options in the ``debugtrace.ini`` file.
     * - ``log_datetime_format``
       - Log date and time format when ``logger`` is ``StdOut`` or ``StdErr``
       - ``%Y-%m-%d %H:%M:%S.%f``
-    * - ``enter_format``
-      - | Format of the log output when entering function or method
-        | ``{0}: the function or method name``
-        | ``{1}: the file name``
-        | ``{2}: the line number``
-      - ``{0} ({1}:{2})``
-    * - ``leave_format``
-      - | Format of log output when leaving function or method
-        | ``{0}: function or method name``
-        | ``{1}: the file name``
-        | ``{2}: the line number``
-        | ``{3}: the time from entering``
-      - ``{0} ({1}:{2}) time: {3}``
     * - ``count_format``
       - Output format of the number of elements such as ``list``, ``tuple`` and ``dict``
       - ``count:{}``
@@ -223,13 +217,13 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - Count in line of ``bytes``
       - ``16``
     * - ``collection_limit``
-      - Output limit of elements such as list, tuple, dict
+      - Output limit of elements such as ``list``, ``tuple``, ``dict``
       - ``256``
     * - ``string_limit``
       - Output limit of string elements
       - ``2048``
     * - ``bytes_limit``
-      - Output　limit of ``bytes`` elements
+      - Output limit of ``bytes`` elements
       - ``512``
     * - ``reflection_nest_limit``
       - Limit of reflection nests
@@ -243,7 +237,12 @@ MIT License (MIT)
 7. Release notes
 ================
 
-``DebugTrace-python 1.0.0b9 - Feb. 11, 2020``
+``DebugTrace-python 1.0.0b11 - Mar. 1, 2020``
+------------------------------------------------
+
+* Improvements and Bug fixes
+
+``DebugTrace-python 1.0.0b10 - Feb. 11, 2020``
 ------------------------------------------------
 
 * Improvements and Bug fixes
