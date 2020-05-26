@@ -4,7 +4,7 @@ DebugTrace-python
 
 **DebugTrace-python** is a library that outputs trace logs
 when debugging your Python programs.
-It supports Python 3.5 or later.
+It supports Python 3.7 or later.
 By embedding "``_ = debugtrace.enter()``" at the start of the method,
 you can output the execution status of the program under development.
 
@@ -68,25 +68,31 @@ The following is an example of a Python program using DebugTrace-python and a lo
 Log output contents:
 ::
 
-    2020-02-11 20:53:08.082640 DebugTrace-python 1.0.0b10 -> sys.stderr
-    2020-02-11 20:53:08.082744 
-    2020-02-11 20:53:08.085611 Enter func1 (ReadmeExample.py:23)
-    2020-02-11 20:53:08.085774 |   Enter func2 (ReadmeExample.py:15)
-    2020-02-11 20:53:08.085896 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-02-11 20:53:08.085958 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000008
-    2020-02-11 20:53:08.086038 |   |   
-    2020-02-11 20:53:08.086077 |   |   Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-02-11 20:53:08.086123 |   |   Leave Contact.__init__ (ReadmeExample.py:8) time: 0:00:00.000004
-    2020-02-11 20:53:08.086474 |   |   contact = (list)[
-    2020-02-11 20:53:08.086516 |   |     (__main__.Contact){
-    2020-02-11 20:53:08.086533 |   |       birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName: (length:5)'Apple'
-    2020-02-11 20:53:08.086560 |   |     }, 
-    2020-02-11 20:53:08.086591 |   |     (__main__.Contact){
-    2020-02-11 20:53:08.086605 |   |       birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName: (length:5)'Apple'
-    2020-02-11 20:53:08.086613 |   |     }
-    2020-02-11 20:53:08.086638 |   |   ]
-    2020-02-11 20:53:08.086680 |   Leave func2 (ReadmeExample.py:15) time: 0:00:00.000851
-    2020-02-11 20:53:08.086724 Leave func1 (ReadmeExample.py:23) time: 0:00:00.001032
+    2020-05-25 23:40:36.825030 DebugTrace-python 1.0.0
+    2020-05-25 23:40:36.825094 　logger: sys.stderr
+    2020-05-25 23:40:36.825125   config file path: <No config file>
+    2020-05-25 23:40:36.825150 
+    2020-05-25 23:40:36.828820 Enter func1 (ReadmeExample.py:23)
+    2020-05-25 23:40:36.828983 | Enter func2 (ReadmeExample.py:15)
+    2020-05-25 23:40:36.829047 | | Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-05-25 23:40:36.829119 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000014
+    2020-05-25 23:40:36.829196 | | 
+    2020-05-25 23:40:36.829235 | | Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-05-25 23:40:36.829279 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000004
+    2020-05-25 23:40:36.829808 | | 
+    2020-05-25 23:40:36.829849 | | contact = (list)[
+    2020-05-25 23:40:36.829881 | |   (__main__.Contact){
+    2020-05-25 23:40:36.829920 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName:
+    2020-05-25 23:40:36.829946 | |     (length:5)'Apple'
+    2020-05-25 23:40:36.829972 | |   },
+    2020-05-25 23:40:36.829997 | |   (__main__.Contact){
+    2020-05-25 23:40:36.830022 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName:
+    2020-05-25 23:40:36.830048 | |     (length:5)'Apple'
+    2020-05-25 23:40:36.830073 | |   }
+    2020-05-25 23:40:36.830098 | | ] (ReadmeExample.py:20)
+    2020-05-25 23:40:36.830128 | | 
+    2020-05-25 23:40:36.830163 | Leave func2 (ReadmeExample.py:15) duration: 0:00:00.001125
+    2020-05-25 23:40:36.830202 Leave func1 (ReadmeExample.py:23) duration: 0:00:00.001310
 
 4. Functions
 ============
@@ -94,32 +100,46 @@ Log output contents:
 There are mainly the following functions.
 
 .. list-table:: Function list
-    :widths: 10, 45, 45
+    :widths: 10, 90
     :header-rows: 1
 
     * - Name
-      - Arguments
       - Discription
     * - ``enter``
-      - **invoker** (object): Pass the self or cls of the invoker. (Optional)
       - | Outputs an entering log.
         | Also outputs a leaving log at the end of the code block.
+        |
+        | *Arguments*:
+        | **invoker** (``object optional``): Pass the self or cls of the invoker. (Optional)
         |
         | *Examples*:
         | ``_ = debugtrace.enter(self)``
         | ``_ = debugtrace.enter(cls)``
         | ``_ = debugtrace.enter()``
     * - ``print``
-      - | **name** (str): Variable name, etc.
+      - | Outputs the variable name and value.
+        |
+        | *Arguments*:
+        | **name** (str): Variable name, etc.
         | **value** (object): Output value
         | **output_private** (bool): Output private member if True (default: False)
         | **output_method** (bool): Output method if True (default: False)
-      - | Outputs the variable name and value.
+        |
+        | The following are keyword arguments and can be omitted.
+        |
+        | **force_reflection** (``bool``): If true, outputs using reflection even if it has a ``__str__`` or ``__repr__`` method (default: ``False``)
+        | **output_private** (``bool``): If true, also outputs private members when using reflection (default: ``False``)
+        | **output_method** (``bool``): If true, also outputs method members when using reflection (default: ``False``)
+        | **collection_limit** (``int``): Limit value of elements such as ``list``, ``tuple`` and ``dict`` to output (default: ``None``)
+        | **bytes_limit** (``int``):  Limit value of elements for ``bytes`` and ``bytearray`` to output (default: ``None``)
+        | **string_limit** (``int``): Limit value of characters for string to output (default: ``None``)
+        | **reflection_nest_limit** (int): Limit value of reflection nests (default: ``None``)
         |
         | *Examples*:
         | ``debugtrace.print('Hellow')``
         | ``debugtrace.print('foo', foo)``
-
+        | ``debugtrace.print('foo', foo, force_reflection=True)``
+        | ``debugtrace.print('foos', foos, collection_limit=1024)``
 
 5. Options that can be specified in the **debugtrace.ini** file
 ===============================================================
@@ -157,77 +177,82 @@ You can specify the following options in the ``debugtrace.ini`` file.
         | ``True: Log output is enabled``
       - ``True``
     * - ``enter_format``
-      - | Format of the log output when entering function or method
-        | ``{0}: the function or method name``
-        | ``{1}: the file name``
-        | ``{2}: the line number``
+      - | Format string of log output when entering functions or methods
+        | ``{0}: The function or method name``
+        | ``{1}: The file name``
+        | ``{2}: The line number``
       - ``Enter {0} ({1}:{2})``
     * - ``leave_format``
-      - | Format of log output when leaving function or method
-        | ``{0}: function or method name``
-        | ``{1}: the file name``
-        | ``{2}: the line number``
-        | ``{3}: the time from entering``
-      - ``Leave {0} ({1}:{2}) time: {3}``
-    * - ``limit_string``
-      - String output when limit is exceeded
-      - ``...``
+      - | Format string of log output when leaving functions or methods
+        | ``{0}: The function or method name``
+        | ``{1}: The file name``
+        | ``{2}: The line number``
+        | ``{3}: The time from entering``
+      - ``Leave {0} ({1}:{2}) duration: {3}``
     * - ``maximum_indents``
       - Maximum number of indents
       - ``20``
-    * - ``code_indent_string``
+    * - ``indent_string``
       - Indentation string for code
-      - ｜␠␠␠
+      - ``|\s``
     * - ``data_indent_string``
       - Indentation string for data
-      - | ␠␠
-        | (2 spaces)
+      - ``\s\s``
+    * - ``limit_string``
+      - String to represent that it has exceeded the limit
+      - ``...``
     * - ``non_output_string``
-      - String to be output instead of not outputting value
+      - | String to be output instead of not outputting value
+        | (Currently unused)
       - ``...``
     * - ``cyclic_reference_string``
-      - String to be output when referring to a cycle
+      - String to represent that the cyclic reference occurs
       - ``*** Cyclic Reference ***``
     * - ``varname_value_separator``
-      - String separating variable name and value
-      - ``␠=␠``
+      - Separator string between the variable name and value
+      - ``\s=\s``
     * - ``key_value_separator``
-      - | String separating the dictionary key and value
-        | And separating the attribute name and value
-      - ``:␠``
-    * - ``log_datetime_format``
-      - Log date and time format when ``logger`` is ``StdOut`` or ``StdErr``
-      - ``%Y-%m-%d %H:%M:%S.%f``
+      - Separator string between the key and value of dictionary and between the attribute name and value
+      - ``:\s``
+    * - ``print_suffix_format``
+      - Format string of ``print`` method suffix
+      - ``\s({1}:{2})``
     * - ``count_format``
-      - Output format of the number of elements such as ``list``, ``tuple`` and ``dict``
+      - Format string of the number of elements such as ``list``, ``tuple`` and ``dict``
       - ``count:{}``
     * - ``minimum_output_count``
       - Minimum value to output the number of elements such as ``list``, ``tuple`` and ``dict``
       - ``5``
     * - ``length_format``
-      - Output format of the length of string and ``bytes``
+      - Format string of the length of string and ``bytes``
       - ``length:{}``
     * - ``minimum_output_length``
       - Minimum value to output the length of string and ``bytes``
       - ``5``
+    * - ``log_datetime_format``
+      - | Log date and time format when ``logger`` is ``StdOut`` or ``StdErr``
+        | (Currently not configurable)
+      - ``%Y-%m-%d %H:%M:%S.%f``
     * - ``maximum_data_output_width``
       - Maximum output width of data
-      - ``80``
+      - ``70``
     * - ``bytes_count_in_line``
       - Count in line of ``bytes``
       - ``16``
     * - ``collection_limit``
-      - Output limit of elements such as ``list``, ``tuple``, ``dict``
-      - ``256``
-    * - ``string_limit``
-      - Output limit of string elements
-      - ``2048``
-    * - ``bytes_limit``
-      - Output limit of ``bytes`` elements
+      - Limit value of elements such as ``list``, ``tuple`` and ``dict`` to output
       - ``512``
+    * - ``bytes_limit``
+      - Limit value of elements for ``bytes`` and ``bytearray``  to output
+      - ``8192``
+    * - ``string_limit``
+      - Limit value of characters for string to output
+      - ``8192``
     * - ``reflection_nest_limit``
-      - Limit of reflection nests
+      - Limit value of reflection nests
       - ``4``
+
+*Converts* ``\s`` *to space.*
 
 6. License
 ==========
@@ -237,49 +262,9 @@ MIT License (MIT)
 7. Release notes
 ================
 
-``DebugTrace-python 1.0.0b11 - Mar. 1, 2020``
+``DebugTrace-python 1.0.0 - May. 26, 2020``
 ------------------------------------------------
 
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b10 - Feb. 11, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b9 - Feb. 9, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b8 - Feb. 7, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b7 - Feb. 5, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b6 - Feb. 4, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b5 - Feb. 3, 2020``
-------------------------------------------------
-
-* Improvements and Bug fixes
-
-``DebugTrace-python 1.0.0b4 - Jan. 31, 2020``
-------------------------------------------------
-
-* Change ``print_`` function name to ``print``.
-
-``DebugTrace-python 1.0.0b2 - Jan. 13, 2020``
-------------------------------------------------
-
-* First release (beta version)
+ First release
 
 *(C) 2020 Masato Kokubo*

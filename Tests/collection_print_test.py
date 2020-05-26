@@ -1,8 +1,3 @@
-from datetime import date
-from datetime import time
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
 import unittest
 from parameterized import parameterized
 import debugtrace
@@ -26,10 +21,11 @@ class CollectionPrintTest(unittest.TestCase):
         ({1: 'A', 2: 'B', 3: {4: 'D', 5: 'E', 6: 'F'}}, "(dict){1: 'A', 2: 'B', 3: (dict){4: 'D', 5: 'E', 6: 'F'}}"),
         ('end', "'end'")
     ])
-    def test_print(self, value: object, result: str) -> None:
+    def test_print(self, value: object, expected: str) -> None:
         debugtrace.print('value', value)
-        self.assertEqual(len(debugtrace.main._last_print_strings), 1)
-        self.assertEqual(debugtrace.main._last_print_strings[0], 'value = ' + result)
+        self.assertTrue(debugtrace.last_print_string().startswith(
+            'value = ' + expected + ' (collection_print_test.py:'),
+            msg=debugtrace.last_print_string())
 
 if __name__ == '__main__':
     unittest.main()

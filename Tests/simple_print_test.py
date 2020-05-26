@@ -33,10 +33,10 @@ class SimplePrintTest(unittest.TestCase):
         ('\x14\x15\x16\x17' , "'\\x14\\x15\\x16\\x17'"),
         ('\x18\x19\x1A\x1B' , "'\\x18\\x19\\x1A\\x1B'"),
         ('\x1C\x1D\x1E\x1F' , "'\\x1C\\x1D\\x1E\\x1F'"),
-        (          b'\x00\x01\x02\x03'     , '(bytes)[00 01 02 03  ....]'),
-        (          b'\x30\x31\x32\x33\x34' , '(bytes length:5)[30 31 32 33 34  01234]'),
-        (bytearray(b'\x00\x01\x02\x03'    ), '(bytearray)[00 01 02 03  ....]'),
-        (bytearray(b'\x30\x31\x32\x33\x34'), '(bytearray length:5)[30 31 32 33 34  01234]'),
+        (          b'\x00\x01\x02\x03'     , '(bytes)[00 01 02 03 | ....]'),
+        (          b'\x30\x31\x32\x33\x34' , '(bytes length:5)[30 31 32 33 34 | 01234]'),
+        (bytearray(b'\x00\x01\x02\x03'    ), '(bytearray)[00 01 02 03 | ....]'),
+        (bytearray(b'\x30\x31\x32\x33\x34'), '(bytearray length:5)[30 31 32 33 34 | 01234]'),
         (date(2020, 3, 1), '2020-03-01'),
         (time( 1,  2,  3), '01:02:03'),
         (time(23, 48, 59), '23:48:59'),
@@ -50,10 +50,11 @@ class SimplePrintTest(unittest.TestCase):
         (datetime(2020, 3, 1, 1, 2, 3, 456789, tzinfo=timezone(timedelta(hours=+9.5 ))), '2020-03-01 01:02:03.456789+09:30'),
         ('end', "'end'")
     ])
-    def test_print(self, value: object, result: str) -> None:
+    def test_print(self, value: object, expected: str) -> None:
         debugtrace.print('value', value)
-        self.assertEqual(len(debugtrace.main._last_print_strings), 1)
-        self.assertEqual(debugtrace.main._last_print_strings[0], 'value = ' + result)
+        self.assertTrue(debugtrace.last_print_string().startswith(
+            'value = ' + expected + ' (simple_print_test.py:'),
+            msg=debugtrace.last_print_string())
 
 if __name__ == '__main__':
     unittest.main()
