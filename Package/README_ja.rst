@@ -63,31 +63,31 @@ DebugTrace-python
 ログの出力内容:
 ::
 
-    2020-05-25 23:40:36.825030 DebugTrace-python 1.0.0
-    2020-05-25 23:40:36.825094 　logger: sys.stderr
-    2020-05-25 23:40:36.825125   config file path: <No config file>
-    2020-05-25 23:40:36.825150 
-    2020-05-25 23:40:36.828820 Enter func1 (ReadmeExample.py:23)
-    2020-05-25 23:40:36.828983 | Enter func2 (ReadmeExample.py:15)
-    2020-05-25 23:40:36.829047 | | Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-05-25 23:40:36.829119 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000014
-    2020-05-25 23:40:36.829196 | | 
-    2020-05-25 23:40:36.829235 | | Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-05-25 23:40:36.829279 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000004
-    2020-05-25 23:40:36.829808 | | 
-    2020-05-25 23:40:36.829849 | | contact = (list)[
-    2020-05-25 23:40:36.829881 | |   (__main__.Contact){
-    2020-05-25 23:40:36.829920 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1, lastName:
-    2020-05-25 23:40:36.829946 | |     (length:5)'Apple'
-    2020-05-25 23:40:36.829972 | |   },
-    2020-05-25 23:40:36.829997 | |   (__main__.Contact){
-    2020-05-25 23:40:36.830022 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2, lastName:
-    2020-05-25 23:40:36.830048 | |     (length:5)'Apple'
-    2020-05-25 23:40:36.830073 | |   }
-    2020-05-25 23:40:36.830098 | | ] (ReadmeExample.py:20)
-    2020-05-25 23:40:36.830128 | | 
-    2020-05-25 23:40:36.830163 | Leave func2 (ReadmeExample.py:15) duration: 0:00:00.001125
-    2020-05-25 23:40:36.830202 Leave func1 (ReadmeExample.py:23) duration: 0:00:00.001310
+    2020-07-19 11:39:53.708348 DebugTrace-python 1.0.1
+    2020-07-19 11:39:53.708415   config file path: <No config file>
+    2020-07-19 11:39:53.708427 　logger: sys.stderr
+    2020-07-19 11:39:53.708435 
+    2020-07-19 11:39:53.712857 Enter func1 (ReadmeExample.py:23)
+    2020-07-19 11:39:53.713020 | Enter func2 (ReadmeExample.py:15)
+    2020-07-19 11:39:53.713114 | | Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-07-19 11:39:53.713171 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000009
+    2020-07-19 11:39:53.713242 | | 
+    2020-07-19 11:39:53.713279 | | Enter Contact.__init__ (ReadmeExample.py:8)
+    2020-07-19 11:39:53.713322 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000004
+    2020-07-19 11:39:53.713889 | | 
+    2020-07-19 11:39:53.713937 | | contact = (list)[
+    2020-07-19 11:39:53.713956 | |   (__main__.Contact){
+    2020-07-19 11:39:53.713981 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
+    2020-07-19 11:39:53.714007 | |     lastName: (length:5)'Apple'
+    2020-07-19 11:39:53.714032 | |   },
+    2020-07-19 11:39:53.714057 | |   (__main__.Contact){
+    2020-07-19 11:39:53.714081 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
+    2020-07-19 11:39:53.714107 | |     lastName: (length:5)'Apple'
+    2020-07-19 11:39:53.714120 | |   }
+    2020-07-19 11:39:53.714128 | | ] (ReadmeExample.py:20)
+    2020-07-19 11:39:53.714144 | | 
+    2020-07-19 11:39:53.714180 | Leave func2 (ReadmeExample.py:15) duration: 0:00:00.001086
+    2020-07-19 11:39:53.714223 Leave func1 (ReadmeExample.py:23) duration: 0:00:00.001289
 
 4. 関数
 =========================
@@ -255,9 +255,14 @@ MIT ライセンス(MIT)
 7. リリースノート
 ==================
 
+``DebugTrace-python 1.0.1 - 2020-07-19``
+-------------------------------------------
+
+* データ出力の改行処理を改善
+
 ``DebugTrace-python 1.0.0 - 2020-05-26``
 -------------------------------------------
 
-最初のリリース
+* 最初のリリース
 
 *(C) 2020 Masato Kokubo*

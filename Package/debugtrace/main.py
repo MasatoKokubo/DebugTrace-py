@@ -258,7 +258,7 @@ def init(config_path: str = './debugtrace.ini'):
     _is_enabled                = _get_config_value('is_enabled'                  , True                      )
     _enter_format              = _get_config_value('enter_format'                , 'Enter {0} ({1}:{2})'     )
     _leave_format              = _get_config_value('leave_format'                , 'Leave {0} ({1}:{2}) duration: {3}')
-    _maximum_indents           = _get_config_value('maximum_indents'             , 20                        )
+    _maximum_indents           = _get_config_value('maximum_indents'             , 32                        )
     _indent_string             = _get_config_value('indent_string'               , '| '                      )
     _data_indent_string        = _get_config_value('data_indent_string'          , '  '                      )
     _limit_string              = _get_config_value('limit_string'                , '...'                     )
@@ -294,8 +294,8 @@ def init(config_path: str = './debugtrace.ini'):
 
     if _is_enabled:
         _logger.print('DebugTrace-python ' + version.VERSION)
-        _logger.print('　logger: ' + str(_logger))
         _logger.print('  config file path: ' + _config_path)
+        _logger.print('　logger: ' + str(_logger))
         _logger.print('')
 
 class _PrintOptions(object):
@@ -434,7 +434,7 @@ def _to_string(name: str, value: object, print_options: _PrintOptions) -> LogBuf
                 buff.no_break_append(_limit_string)
             else:
                 _reflected_objects.append(value)
-                value_buff = _to_string_using_refrection(value, print_options)
+                value_buff = _to_string_refrection(value, print_options)
                 _reflected_objects.pop()
             buff.append_buffer(value_buff)
 
@@ -568,7 +568,7 @@ def _to_string_bytes(value: bytes, print_options: _PrintOptions) -> LogBuffer:
 
     return buff
 
-def _to_string_using_refrection(value: object, print_options: _PrintOptions) -> LogBuffer:
+def _to_string_refrection(value: object, print_options: _PrintOptions) -> LogBuffer:
     '''
     Returns a LogBuffer containing a string representation of the value with reflection.
 
@@ -583,18 +583,18 @@ def _to_string_using_refrection(value: object, print_options: _PrintOptions) -> 
 
     buff.append(_get_type_name(value))
 
-    body_buff = _to_string_using_refrection_body(value, print_options)
+    body_buff = _to_string_refrection_body(value, print_options)
 
-    is_malti_lines = body_buff.is_multi_lines or buff.length + body_buff.length > _maximum_data_output_width
+    is_multi_lines = body_buff.is_multi_lines or buff.length + body_buff.length > _maximum_data_output_width
 
     buff.no_break_append('{')
-    if is_malti_lines:
+    if is_multi_lines:
         buff.line_feed()
         buff.up_nest()
 
     buff.append_buffer(body_buff)
 
-    if is_malti_lines:
+    if is_multi_lines:
         if buff.length > 0:
             buff.line_feed()
         buff.down_nest()
@@ -602,7 +602,7 @@ def _to_string_using_refrection(value: object, print_options: _PrintOptions) -> 
 
     return buff
 
-def _to_string_using_refrection_body(value: object, print_options: _PrintOptions) -> LogBuffer:
+def _to_string_refrection_body(value: object, print_options: _PrintOptions) -> LogBuffer:
     '''
     Returns a LogBuffer containing the body of a string representation of the value with reflection.
 
@@ -629,15 +629,22 @@ def _to_string_using_refrection_body(value: object, print_options: _PrintOptions
         buff.append(str(ex))
         return buff
 
+    was_multi_lines = False
     index = 0
     for member in members:
         if index > 0:
             buff.no_break_append(', ')
 
         name = member[0]
-        value_buff = _to_string('', member[1], print_options)
+        value = member[1]
+        member_buff = LogBuffer(_maximum_data_output_width)
+        member_buff.append(name).no_break_append(_key_value_separator)
+        member_buff.append_buffer(_to_string('', value, print_options))
+        if index > 0 and (was_multi_lines or member_buff.is_multi_lines):
+            buff.line_feed()
+        buff.append_buffer(member_buff)
 
-        buff.append(name).no_break_append(_key_value_separator).append_buffer(value_buff)
+        was_multi_lines = member_buff.is_multi_lines
         index += 1
 
     return buff
@@ -699,6 +706,7 @@ def _to_string_iterable_body(values: object, print_options: _PrintOptions) -> Lo
     '''
     buff = LogBuffer(_maximum_data_output_width)
 
+    was_multi_lines = False
     index = 0
     for element in values:
         if index > 0:
@@ -716,9 +724,11 @@ def _to_string_iterable_body(values: object, print_options: _PrintOptions) -> Lo
             # list, set, frozenset or tuple
             element_buff = _to_string('', element, print_options)
 
-        if index > 0 and element_buff.is_multi_lines:
+        if index > 0 and (was_multi_lines or element_buff.is_multi_lines):
             buff.line_feed()
         buff.append_buffer(element_buff)
+
+        was_multi_lines = element_buff.is_multi_lines
         index += 1
 
     return buff
@@ -1002,7 +1012,7 @@ def last_print_string() -> str:
     lines = _last_print_buff.lines
     buff_string = '\n'.join(
         list(map(lambda line: _data_indent_string * line[0] + line[1], lines))
-    ) + _last_print_buff._builder
+    )
     return _get_indent_string() + buff_string
 
 init()

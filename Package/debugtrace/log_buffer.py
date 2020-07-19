@@ -12,7 +12,7 @@ class LogBuffer(object):
         '_nest_level',
         '_append_nest_level',
         '_lines',
-        '_builder'
+        '_last_line'
     ]
 
     def __init__(self, maximum_data_output_width: int) -> None:
@@ -27,22 +27,15 @@ class LogBuffer(object):
         self._lines = []
 
         # buffer for a line of logs
-        self._builder = ''
-
-    @property
-    def lines(self) -> list:
-        '''
-        A list of tuple of data indentation level and log string.
-        '''
-        return self._lines.copy()
+        self._last_line = ''
 
     def line_feed(self) -> None:
         '''
         Breaks the current line.
         '''
-        self._lines.append((self._nest_level + self._append_nest_level, self._builder.rstrip()))
+        self._lines.append((self._nest_level + self._append_nest_level, self._last_line.rstrip()))
         self._append_nest_level = 0
-        self._builder = ""
+        self._last_line = ""
 
     def up_nest(self) -> None:
         '''
@@ -73,7 +66,7 @@ class LogBuffer(object):
         if not no_break and self.length > 0 and self.length + len(string) > self._maximum_data_output_width:
             self.line_feed()
         self._append_nest_level = nest_level
-        self._builder += string
+        self._last_line += string
         return self
 
     def no_break_append(self, value: object) -> __class__:
@@ -99,9 +92,8 @@ class LogBuffer(object):
         Returns:
             LogBuffer: This object
         '''
-        buff.line_feed()
         index = 0
-        for line in buff._lines:
+        for line in buff.lines:
             if index > 0:
                 self.line_feed()
             self.append(line[1], line[0])
@@ -111,9 +103,9 @@ class LogBuffer(object):
     @property
     def length(self) -> int:
         '''
-        The length of the current line.
+        The length of the last line.
         '''
-        return len(self._builder)
+        return len(self._last_line)
 
     @property
     def is_multi_lines(self) -> bool:
@@ -121,3 +113,13 @@ class LogBuffer(object):
         True if multiple line, false otherwise.
         '''
         return len(self._lines) > 1 or len(self._lines) == 1 and self.length > 0
+
+    @property
+    def lines(self) -> list:
+        '''
+        A list of tuple of data indentation level and log string.
+        '''
+        lines = self._lines.copy()
+        if self.length > 0:
+            lines.append((self._nest_level, self._last_line))
+        return lines
