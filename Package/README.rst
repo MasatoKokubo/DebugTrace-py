@@ -12,7 +12,7 @@ you can output the execution status of the program under development.
 ===========
 
 * Automatically outputs the method name, source file name and line number
-  of callers of ``debugtrace.enter`` function.
+  of invokers of ``debugtrace.enter`` function.
 * Also outputs end logs when the scope ends.
 * Indents logs automatically with nested methods and objects.
 * Automatically line breaks in value output.
@@ -29,12 +29,12 @@ you can output the execution status of the program under development.
 3. How to use
 =============
 
-Do the following for the debuggee and related functions or methods:
+Do the following for the debug target and related functions and methods:
 
 * Insert "``_ = debugtrace.enter()``" at the beginning of functions and methods.
 * Insert "``debugtrace.print('foo', foo)``" to output variables to the log if necessary.
 
-The following is an example of a Python program using DebugTrace-python and a log when it is executed.
+The following is an example of a Python program using DebugTrace-py and a log when it is executed.
 
 ::
 
@@ -130,10 +130,10 @@ There are mainly the following functions.
         | **force_reflection** (``bool``): If true, outputs using reflection even if it has a ``__str__`` or ``__repr__`` method (default: ``False``)
         | **output_private** (``bool``): If true, also outputs private members when using reflection (default: ``False``)
         | **output_method** (``bool``): If true, also outputs method members when using reflection (default: ``False``)
-        | **collection_limit** (``int``): Limit value of elements such as ``list``, ``tuple`` and ``dict`` to output (default: ``None``)
-        | **bytes_limit** (``int``):  Limit value of elements for ``bytes`` and ``bytearray`` to output (default: ``None``)
-        | **string_limit** (``int``): Limit value of characters for string to output (default: ``None``)
-        | **reflection_nest_limit** (int): Limit value of reflection nests (default: ``None``)
+        | **collection_limit** (``int``): The limit value of elements such as ``list``, ``tuple`` and ``dict`` to output (default: ``None``)
+        | **bytes_limit** (``int``):  The limit value of elements for ``bytes`` and ``bytearray`` to output (default: ``None``)
+        | **string_limit** (``int``): The limit value of characters for string to output (default: ``None``)
+        | **reflection_nest_limit** (int): The The limit value for reflection nesting (default: ``None``)
         |
         | *Examples*:
         | ``debugtrace.print('Hellow')``
@@ -158,98 +158,98 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - Description
       - Default Value
     * - ``logger``
-      - | Logger used by debugtrace
+      - | The logger used by debugtrace
         | ``StdOut: Output to sys.stdout``
         | ``StdErr: Output to sys.stderr``
         | ``Logger: Output using logging package``
       - ``StdErr``
     * - ``logging_config_file``
-      - Configuration file name specified in logging package
+      - The configuration file name specified in logging package
       - ``logging.conf``
     * - ``logging_logger_name``
-      - Logger name when using the logging package
+      - The logger name when using the logging package
       - ``debugtrace``
     * - ``logging_level``
-      - Log level when using the logging package
+      - The log level when using the logging package
       - ``DEBUG``
     * - ``is_enabled``
       - | ``False: Log output is disabled``
         | ``True: Log output is enabled``
       - ``True``
     * - ``enter_format``
-      - | Format string of log output when entering functions or methods
+      - | The format string of log output when entering functions or methods
         | ``{0}: The function or method name``
         | ``{1}: The file name``
         | ``{2}: The line number``
       - ``Enter {0} ({1}:{2})``
     * - ``leave_format``
-      - | Format string of log output when leaving functions or methods
+      - | The format string of log output when leaving functions or methods
         | ``{0}: The function or method name``
         | ``{1}: The file name``
         | ``{2}: The line number``
         | ``{3}: The time from entering``
       - ``Leave {0} ({1}:{2}) duration: {3}``
     * - ``maximum_indents``
-      - Maximum number of indents
+      - The maximum number of indents
       - ``20``
     * - ``indent_string``
-      - Indentation string for code
+      - The indentation string for code
       - ``|\s``
     * - ``data_indent_string``
-      - Indentation string for data
+      - The indentation string for data
       - ``\s\s``
     * - ``limit_string``
-      - String to represent that it has exceeded the limit
+      - The string to represent that it has exceeded the limit
       - ``...``
     * - ``non_output_string``
-      - | String to be output instead of not outputting value
+      - | The string to be output instead of not outputting value
         | (Currently unused)
       - ``...``
     * - ``cyclic_reference_string``
-      - String to represent that the cyclic reference occurs
+      - The string to represent that the cyclic reference occurs
       - ``*** Cyclic Reference ***``
     * - ``varname_value_separator``
-      - Separator string between the variable name and value
+      - The separator string between the variable name and value
       - ``\s=\s``
     * - ``key_value_separator``
-      - Separator string between the key and value of dictionary and between the attribute name and value
+      - The separator string between the key and value of dictionary and between the attribute name and value
       - ``:\s``
     * - ``print_suffix_format``
-      - Format string of ``print`` method suffix
+      - The format string of ``print`` method suffix
       - ``\s({1}:{2})``
     * - ``count_format``
-      - Format string of the number of elements such as ``list``, ``tuple`` and ``dict``
+      - The format string of the number of elements such as ``list``, ``tuple`` and ``dict``
       - ``count:{}``
     * - ``minimum_output_count``
-      - Minimum value to output the number of elements such as ``list``, ``tuple`` and ``dict``
+      - The minimum value to output the number of elements such as ``list``, ``tuple`` and ``dict``
       - ``5``
     * - ``length_format``
-      - Format string of the length of string and ``bytes``
+      - The format string of the length of string and ``bytes``
       - ``length:{}``
     * - ``minimum_output_length``
-      - Minimum value to output the length of string and ``bytes``
+      - The minimum value to output the length of string and ``bytes``
       - ``5``
     * - ``log_datetime_format``
       - | Log date and time format when ``logger`` is ``StdOut`` or ``StdErr``
         | (Currently not configurable)
       - ``%Y-%m-%d %H:%M:%S.%f``
     * - ``maximum_data_output_width``
-      - Maximum output width of data
+      - The maximum output width of data
       - ``70``
     * - ``bytes_count_in_line``
-      - Count in line of ``bytes``
+      - The count in line of ``bytes``
       - ``16``
     * - ``collection_limit``
-      - Limit value of elements such as ``list``, ``tuple`` and ``dict`` to output
+      - The limit value of elements such as ``list``, ``tuple`` and ``dict`` to output
       - ``512``
     * - ``bytes_limit``
-      - Limit value of elements for ``bytes`` and ``bytearray``  to output
+      - The limit value of elements for ``bytes`` and ``bytearray``  to output
       - ``8192``
     * - ``string_limit``
-      - Limit value of characters for string to output
+      - The limit value of characters for string to output
       - ``8192``
     * - ``reflection_nest_limit``
-      - Limit value of reflection nests
+      - The The limit value for reflection nesting
       - ``4``
 
 *Converts* ``\s`` *to space.*
@@ -265,7 +265,7 @@ MIT License (MIT)
 ``DebugTrace-python 1.0.1 - July 19, 2020``
 ------------------------------------------------
 
-* Improved the line breaking processing for data output.
+* Improved the line break handling of data output.
 
 ``DebugTrace-python 1.0.0 - May 26, 2020``
 ------------------------------------------------
