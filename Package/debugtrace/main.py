@@ -293,7 +293,7 @@ def init(config_path: str = './debugtrace.ini'):
         pr._print('debugtrace: (' + _config_path + ') logger = ' + _logger_name + ' (Unknown)', sys.stderr)
 
     if _is_enabled:
-        _logger.print('DebugTrace-python ' + version.VERSION)
+        _logger.print('DebugTrace-py ' + version.VERSION)
         _logger.print('  config file path: ' + _config_path)
         _logger.print('　logger: ' + str(_logger))
         _logger.print('')

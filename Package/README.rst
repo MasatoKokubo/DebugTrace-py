@@ -1,8 +1,8 @@
-#################
-DebugTrace-python
-#################
+#############
+DebugTrace-py
+#############
 
-**DebugTrace-python** is a library that outputs trace logs
+**DebugTrace-py** is a library that outputs trace logs
 when debugging your Python programs.
 It supports Python 3.7 or later.
 By embedding "``_ = debugtrace.enter()``" at the start of the method,
@@ -68,31 +68,31 @@ The following is an example of a Python program using DebugTrace-py and a log wh
 Log output contents:
 ::
 
-    2020-07-19 11:39:53.708348 DebugTrace-python 1.0.1
-    2020-07-19 11:39:53.708415   config file path: <No config file>
-    2020-07-19 11:39:53.708427 　logger: sys.stderr
-    2020-07-19 11:39:53.708435 
-    2020-07-19 11:39:53.712857 Enter func1 (ReadmeExample.py:23)
-    2020-07-19 11:39:53.713020 | Enter func2 (ReadmeExample.py:15)
-    2020-07-19 11:39:53.713114 | | Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-07-19 11:39:53.713171 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000009
-    2020-07-19 11:39:53.713242 | | 
-    2020-07-19 11:39:53.713279 | | Enter Contact.__init__ (ReadmeExample.py:8)
-    2020-07-19 11:39:53.713322 | | Leave Contact.__init__ (ReadmeExample.py:8) duration: 0:00:00.000004
-    2020-07-19 11:39:53.713889 | | 
-    2020-07-19 11:39:53.713937 | | contact = (list)[
-    2020-07-19 11:39:53.713956 | |   (__main__.Contact){
-    2020-07-19 11:39:53.713981 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
-    2020-07-19 11:39:53.714007 | |     lastName: (length:5)'Apple'
-    2020-07-19 11:39:53.714032 | |   },
-    2020-07-19 11:39:53.714057 | |   (__main__.Contact){
-    2020-07-19 11:39:53.714081 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
-    2020-07-19 11:39:53.714107 | |     lastName: (length:5)'Apple'
-    2020-07-19 11:39:53.714120 | |   }
-    2020-07-19 11:39:53.714128 | | ] (ReadmeExample.py:20)
-    2020-07-19 11:39:53.714144 | | 
-    2020-07-19 11:39:53.714180 | Leave func2 (ReadmeExample.py:15) duration: 0:00:00.001086
-    2020-07-19 11:39:53.714223 Leave func1 (ReadmeExample.py:23) duration: 0:00:00.001289
+    2020-11-29 14:02:36.423205 DebugTrace-py 1.0.2
+    2020-11-29 14:02:36.423264   config file path: <No config file>
+    2020-11-29 14:02:36.423343 　logger: sys.stderr
+    2020-11-29 14:02:36.423358 
+    2020-11-29 14:02:36.427672 Enter func1 (ReadmeExample.py:22)
+    2020-11-29 14:02:36.427836 | Enter func2 (ReadmeExample.py:14)
+    2020-11-29 14:02:36.427922 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2020-11-29 14:02:36.427959 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000006
+    2020-11-29 14:02:36.428039 | | 
+    2020-11-29 14:02:36.428061 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2020-11-29 14:02:36.428086 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
+    2020-11-29 14:02:36.428705 | | 
+    2020-11-29 14:02:36.428732 | | contacts = (list)[
+    2020-11-29 14:02:36.428743 | |   (__main__.Contact){
+    2020-11-29 14:02:36.428751 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
+    2020-11-29 14:02:36.428758 | |     lastName: (length:5)'Apple'
+    2020-11-29 14:02:36.428765 | |   },
+    2020-11-29 14:02:36.428772 | |   (__main__.Contact){
+    2020-11-29 14:02:36.428779 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
+    2020-11-29 14:02:36.428787 | |     lastName: (length:5)'Apple'
+    2020-11-29 14:02:36.428794 | |   }
+    2020-11-29 14:02:36.428800 | | ] (ReadmeExample.py:19)
+    2020-11-29 14:02:36.428812 | | 
+    2020-11-29 14:02:36.428829 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000954
+    2020-11-29 14:02:36.428848 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001123
 
 4. Functions
 ============
@@ -144,7 +144,7 @@ There are mainly the following functions.
 5. Options that can be specified in the **debugtrace.ini** file
 ===============================================================
 
-DebugTrace-python reads the ``debugtrace.ini`` file
+DebugTrace-py reads the ``debugtrace.ini`` file
 in the current directory for initialization.
 The section is ``[debugtrace]``.
 
@@ -262,13 +262,18 @@ MIT License (MIT)
 7. Release notes
 ================
 
-``DebugTrace-python 1.0.1 - July 19, 2020``
-------------------------------------------------
+``DebugTrace-py 1.0.2 - November 29, 2020``
+-------------------------------------------
+
+* Change the start message. (``'DebugTrace-py ...'`` <- ``'DebugTrace-python ...'``)
+
+``DebugTrace-py 1.0.1 - July 19, 2020``
+-------------------------------------------
 
 * Improved the line break handling of data output.
 
-``DebugTrace-python 1.0.0 - May 26, 2020``
-------------------------------------------------
+``DebugTrace-py 1.0.0 - May 26, 2020``
+-------------------------------------------
 
 * First release
 
