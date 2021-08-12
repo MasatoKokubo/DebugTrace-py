@@ -35,11 +35,10 @@ class LineBreakTest(unittest.TestCase):
     def cleanUp(self):
         debugtrace.main._maximum_data_output_width = maximum_data_output_width
 
-
     def test_line_break_of_iterable(self) -> None:
         contacts = [
-            Contact('Akane' , 'Apple' , (2020, 1, 1), '080-1111-1111'),
-            Contact('Yukari', 'Apple' , (2020, 2, 2), '080-2222-2222'),
+            Contact('Akane' , 'Apple' , date(2020, 1, 1), '080-1111-1111'),
+            Contact('Yukari', 'Apple' , date(2020, 2, 2), '080-2222-2222'),
             None,
             None
         ]
@@ -56,8 +55,8 @@ class LineBreakTest(unittest.TestCase):
 
     def test_line_break_of_refrection(self) -> None:
         contacts = Contacts(
-            Contact('Akane' , 'Apple' , (2020, 1, 1), '080-1111-1111'),
-            Contact('Yukari', 'Apple' , (2020, 2, 2), '080-2222-2222'),
+            Contact('Akane' , 'Apple' , date(2020, 1, 1), '080-1111-1111'),
+            Contact('Yukari', 'Apple' , date(2020, 2, 2), '080-2222-2222'),
             None,
             None
         )
@@ -71,6 +70,27 @@ class LineBreakTest(unittest.TestCase):
         self.assertTrue('  phone_number:' in debugtrace.last_print_string())
         self.assertTrue('},\n  contact2: (__main__.Contact){' in debugtrace.last_print_string())
         self.assertTrue('},\n  contact3: None, contact4: None' in debugtrace.last_print_string())
+
+    # since 1.0.3
+    def test_no_line_break_name_value(self) -> None:
+        _ = debugtrace.enter()
+        foo = '000000000011111111112222222222333333333344444444445555555555'
+        debugtrace.print('foo', foo)
+        self.assertTrue("foo = (length:60)'0000000000" in debugtrace.last_print_string())
+
+    # since 1.0.3
+    def test_no_line_break_object_name_value(self) -> None:
+        _ = debugtrace.enter()
+        foo = Contact('000000000011111111112222222222333333333344444444445555555555', '', date(2021, 1, 1), '')
+        debugtrace.print('foo', foo)
+        self.assertTrue("  first_name: (length:60)'0000000000" in debugtrace.last_print_string())
+
+    # since 1.0.3
+    def test_no_line_break_key_value(self) -> None:
+        _ = debugtrace.enter()
+        foo = {1: '000000000011111111112222222222333333333344444444445555555555'}
+        debugtrace.print('foo', foo)
+        self.assertTrue("  1: (length:60)'0000000000" in debugtrace.last_print_string())
 
 if __name__ == '__main__':
     unittest.main()

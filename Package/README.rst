@@ -40,27 +40,28 @@ The following is an example of a Python program using DebugTrace-py and a log wh
 
     # ReadmeExample.py
     import datetime
-    import debugtrace # for Debugging
+    import debugtrace # ToDo: Remove after debugging
 
     # Contact class
     class Contact(object):
         def __init__(self, id: int, firstName: str, lastName: str, birthday: datetime.date) -> None:
-            _ = debugtrace.enter(self) # for Debugging
+            _ = debugtrace.enter(self) # ToDo: Remove after debugging
             self.id = id
             self.firstName = firstName
             self.lastName  = lastName
             self.birthday  = birthday
 
     def func2():
-        _ = debugtrace.enter() # for Debugging
+        _ = debugtrace.enter() # ToDo: Remove after debugging
         contact = [
             Contact(1, 'Akane' , 'Apple', datetime.date(1991, 2, 3)),
             Contact(2, 'Yukari', 'Apple', datetime.date(1992, 3, 4))
         ]
-        debugtrace.print('contact', contact) # for Debugging
+        debugtrace.print('contact', contact) # ToDo: Remove after debugging
 
     def func1():
-        _ = debugtrace.enter() # for Debugging
+        _ = debugtrace.enter() # ToDo: Remove after debugging
+        debugtrace.print('Hello, World!') # ToDo: Remove after debugging
         func2()
 
     func1()
@@ -68,31 +69,32 @@ The following is an example of a Python program using DebugTrace-py and a log wh
 Log output contents:
 ::
 
-    2020-11-29 14:02:36.423205 DebugTrace-py 1.0.2
-    2020-11-29 14:02:36.423264   config file path: <No config file>
-    2020-11-29 14:02:36.423343 　logger: sys.stderr
-    2020-11-29 14:02:36.423358 
-    2020-11-29 14:02:36.427672 Enter func1 (ReadmeExample.py:22)
-    2020-11-29 14:02:36.427836 | Enter func2 (ReadmeExample.py:14)
-    2020-11-29 14:02:36.427922 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2020-11-29 14:02:36.427959 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000006
-    2020-11-29 14:02:36.428039 | | 
-    2020-11-29 14:02:36.428061 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2020-11-29 14:02:36.428086 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
-    2020-11-29 14:02:36.428705 | | 
-    2020-11-29 14:02:36.428732 | | contacts = (list)[
-    2020-11-29 14:02:36.428743 | |   (__main__.Contact){
-    2020-11-29 14:02:36.428751 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
-    2020-11-29 14:02:36.428758 | |     lastName: (length:5)'Apple'
-    2020-11-29 14:02:36.428765 | |   },
-    2020-11-29 14:02:36.428772 | |   (__main__.Contact){
-    2020-11-29 14:02:36.428779 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
-    2020-11-29 14:02:36.428787 | |     lastName: (length:5)'Apple'
-    2020-11-29 14:02:36.428794 | |   }
-    2020-11-29 14:02:36.428800 | | ] (ReadmeExample.py:19)
-    2020-11-29 14:02:36.428812 | | 
-    2020-11-29 14:02:36.428829 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000954
-    2020-11-29 14:02:36.428848 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001123
+    2021-08-12 17:43:07.772235 DebugTrace-py 1.0.3
+    2021-08-12 17:43:07.772286   config file path: <No config file>
+    2021-08-12 17:43:07.772322 　logger: sys.stderr
+    2021-08-12 17:43:07.772346 
+    2021-08-12 17:43:07.774450 Enter func1 (ReadmeExample.py:22)
+    2021-08-12 17:43:07.774588 | Hello, World! (ReadmeExample.py:23)
+    2021-08-12 17:43:07.774674 | Enter func2 (ReadmeExample.py:14)
+    2021-08-12 17:43:07.774739 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2021-08-12 17:43:07.774780 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000007
+    2021-08-12 17:43:07.774838 | | 
+    2021-08-12 17:43:07.774868 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2021-08-12 17:43:07.774913 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
+    2021-08-12 17:43:07.775289 | | 
+    2021-08-12 17:43:07.775318 | | contacts = (list)[
+    2021-08-12 17:43:07.775350 | |   (__main__.Contact){
+    2021-08-12 17:43:07.775373 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
+    2021-08-12 17:43:07.775395 | |     lastName: (length:5)'Apple'
+    2021-08-12 17:43:07.775419 | |   },
+    2021-08-12 17:43:07.775447 | |   (__main__.Contact){
+    2021-08-12 17:43:07.775460 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
+    2021-08-12 17:43:07.775479 | |     lastName: (length:5)'Apple'
+    2021-08-12 17:43:07.775489 | |   }
+    2021-08-12 17:43:07.775517 | | ] (ReadmeExample.py:19)
+    2021-08-12 17:43:07.775543 | | 
+    2021-08-12 17:43:07.775574 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000840
+    2021-08-12 17:43:07.775591 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001083
 
 4. Functions
 ============
@@ -261,6 +263,11 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-py 1.0.3 - August 12, 2021``
+-------------------------------------------
+
+* Improved the line break handling of data output
 
 ``DebugTrace-py 1.0.2 - November 29, 2020``
 -------------------------------------------

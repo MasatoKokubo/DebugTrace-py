@@ -380,28 +380,42 @@ def _to_string(name: str, value: object, print_options: _PrintOptions) -> LogBuf
     '''
     buff = LogBuffer(_maximum_data_output_width)
 
-    if name != '':
-        buff.append(name).no_break_append(_varname_value_separator)
+# 1.0.3
+#   if name != '':
+    #   buff.append(name).no_break_append(_varname_value_separator)
+    separator = None
+    if name is not None:
+        buff.append(name)
+        separator = _varname_value_separator
+####
 
     if value is None:
         # None
-        buff.append('None')
+    # 1.0.3
+    #   buff.append('None')
+        buff.no_break_append(separator).append('None')
 
     elif isinstance(value, str):
         # str
         value_buff = _to_string_str(value, print_options)
-        buff.append_buffer(value_buff)
+    # 1.0.3
+    #   buff.append_buffer(value_buff)
+        buff.append_buffer(separator, value_buff)
 
     elif isinstance(value, bytes) or isinstance(value, bytearray):
         # bytes
         value_buff = _to_string_bytes(value, print_options)
-        buff.append_buffer(value_buff)
+    # 1.0.3
+    #   buff.append_buffer(value_buff)
+        buff.append_buffer(separator, value_buff)
 
     elif isinstance(value, int) or isinstance(value, float) or \
         isinstance(value, datetime.date) or isinstance(value, datetime.time) or \
         isinstance(value, datetime.datetime):
         # int, float, datetime.date, datetime.time, datetime.datetime
-        buff.append(str(value))
+    # 1.0.3
+    #   buff.append(str(value))
+        buff.no_break_append(separator).append(str(value))
 
     elif isinstance(value, list) or \
             isinstance(value, set) or isinstance(value, frozenset) or \
@@ -409,7 +423,9 @@ def _to_string(name: str, value: object, print_options: _PrintOptions) -> LogBuf
             isinstance(value, dict):
         # list, set, frozenset, tuple, dict
         value_buff = _to_string_iterable(value, print_options)
-        buff.append_buffer(value_buff)
+    # 1.0.3
+    #   buff.append_buffer(value_buff)
+        buff.append_buffer(separator, value_buff)
 
     else:
         has_str, has_repr = _has_str_repr_method(value)
@@ -422,21 +438,29 @@ def _to_string(name: str, value: object, print_options: _PrintOptions) -> LogBuf
             else:
                 value_buff.append('str(): ')
                 value_buff.no_break_append(str(value))
-            buff.append_buffer(value_buff)
+        # 1.0.3
+        #   buff.append_buffer(value_buff)
+            buff.append_buffer(separator, value_buff)
 
         else:
             # use refrection
             if any(map(lambda obj: value is obj, _reflected_objects)):
                 # cyclic reference
-                buff.no_break_append(_cyclic_reference_string)
+            # 1.0.3
+            #   buff.no_break_append(_cyclic_reference_string)
+                value_buff.no_break_append(_cyclic_reference_string)
             elif len(_reflected_objects) > print_options.reflection_nest_limit:
                 # over reflection level limitation
-                buff.no_break_append(_limit_string)
+            # 1.0.3
+            #   buff.no_break_append(_limit_string)
+                value_buff.no_break_append(_limit_string)
             else:
                 _reflected_objects.append(value)
                 value_buff = _to_string_refrection(value, print_options)
                 _reflected_objects.pop()
-            buff.append_buffer(value_buff)
+        # 1.0.3
+        #   buff.append_buffer(value_buff)
+            buff.append_buffer(separator, value_buff)
 
     return buff
 
@@ -592,7 +616,9 @@ def _to_string_refrection(value: object, print_options: _PrintOptions) -> LogBuf
         buff.line_feed()
         buff.up_nest()
 
-    buff.append_buffer(body_buff)
+# 1.0.3
+#   buff.append_buffer(body_buff)
+    buff.append_buffer(None, body_buff)
 
     if is_multi_lines:
         if buff.length > 0:
@@ -638,11 +664,16 @@ def _to_string_refrection_body(value: object, print_options: _PrintOptions) -> L
         name = member[0]
         value = member[1]
         member_buff = LogBuffer(_maximum_data_output_width)
-        member_buff.append(name).no_break_append(_key_value_separator)
-        member_buff.append_buffer(_to_string('', value, print_options))
+    # 1.0.3
+    #   member_buff.append(name).no_break_append(_key_value_separator)
+    #   member_buff.append_buffer(_to_string('', value, print_options))
+        member_buff.append(name)
+        member_buff.append_buffer(_key_value_separator, _to_string(None, value, print_options))
         if index > 0 and (was_multi_lines or member_buff.is_multi_lines):
             buff.line_feed()
-        buff.append_buffer(member_buff)
+    # 1.0.3
+    #   buff.append_buffer(member_buff)
+        buff.append_buffer(None, member_buff)
 
         was_multi_lines = member_buff.is_multi_lines
         index += 1
@@ -683,7 +714,9 @@ def _to_string_iterable(values: object, print_options: _PrintOptions) -> LogBuff
         buff.line_feed()
         buff.up_nest()
 
-    buff.append_buffer(body_buff)
+# 1.0.3
+#   buff.append_buffer(body_buff)
+    buff.append_buffer(None, body_buff)
 
     if is_multi_lines:
         buff.line_feed()
@@ -722,11 +755,15 @@ def _to_string_iterable_body(values: object, print_options: _PrintOptions) -> Lo
             element_buff = _to_string_key_value(element, values[element], print_options)
         else:
             # list, set, frozenset or tuple
-            element_buff = _to_string('', element, print_options)
+        # 1.0.3
+        #   element_buff = _to_string('', element, print_options)
+            element_buff = _to_string(None, element, print_options)
 
         if index > 0 and (was_multi_lines or element_buff.is_multi_lines):
             buff.line_feed()
-        buff.append_buffer(element_buff)
+    # 1.0.3
+    #   buff.append_buffer(element_buff)
+        buff.append_buffer(None, element_buff)
 
         was_multi_lines = element_buff.is_multi_lines
         index += 1
@@ -746,9 +783,14 @@ def _to_string_key_value(key: object, value: object, print_options: _PrintOption
         LogBuffer: a LogBuffer
     '''
     buff = LogBuffer(_maximum_data_output_width)
-    key_buff = _to_string('', key, print_options)
-    value_buff = _to_string('', value, print_options)
-    buff.append_buffer(key_buff).no_break_append(_key_value_separator).append_buffer(value_buff)
+# 1.0.3
+#   key_buff = _to_string('', key, print_options)
+#   value_buff = _to_string('', value, print_options)
+#   buff.append_buffer(key_buff).no_break_append(_key_value_separator).append_buffer(value_buff)
+    key_buff = _to_string(None, key, print_options)
+    value_buff = _to_string(None, value, print_options)
+    buff.append_buffer(None, key_buff).append_buffer(_key_value_separator, value_buff)
+####
     return buff
 
 def _get_type_name(value: object, count: int = -1) -> str:
@@ -979,7 +1021,7 @@ class _DebugTrace(object):
 def enter(invoker: object=None) -> _DebugTrace:
     '''
     By calling this method when entering an execution block such as a function or method,
-    outputs a entering log.
+    outputs an entering log.
     Store the return value in some variable (such as _).
     Outputs a leaving log when leaving the scope of this variable.
 
