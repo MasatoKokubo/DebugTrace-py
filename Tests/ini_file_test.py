@@ -1,3 +1,4 @@
+# ini_file_test.py
 from __future__ import annotations
 import unittest
 from parameterized import parameterized
@@ -91,7 +92,7 @@ class IniFileTest(unittest.TestCase):
 
         debugtrace.print('value', [1111, 2222, 3333, 4444, 5555])
         self.assertTrue(debugtrace.last_print_string().startswith(
-            "value <= (list _count_:5)[\n``1111, 2222, 3333, 4444, 5555\n] "),
+            "value <= (_count_:5)[\n``1111, 2222, 3333, 4444, 5555\n] "),
             msg=debugtrace.last_print_string())
 
     # cyclic_reference_string
@@ -137,22 +138,22 @@ class IniFileTest(unittest.TestCase):
     # string_limit
     @parameterized.expand([
         # tuple
-        ((1, 2, 3, 4)         , "(tuple)(1, 2, 3, 4) "),
-        ((1, 2, 3, 4, 5)      , "(tuple _count_:5)(1, 2, 3, 4, 5) "),
-        ((1, 2, 3, 4, 5, 6)   , "(tuple _count_:6)(1, 2, 3, 4, 5, 6) "),
-        ((1, 2, 3, 4, 5, 6, 7), "(tuple _count_:7)(1, 2, 3, 4, 5, 6, <Limit>) "),
+        ((1, 2, 3, 4)         , "(1, 2, 3, 4) "),
+        ((1, 2, 3, 4, 5)      , "(_count_:5)(1, 2, 3, 4, 5) "),
+        ((1, 2, 3, 4, 5, 6)   , "(_count_:6)(1, 2, 3, 4, 5, 6) "),
+        ((1, 2, 3, 4, 5, 6, 7), "(_count_:7)(1, 2, 3, 4, 5, 6, <Limit>) "),
 
         # list
-        ([1, 2, 3, 4]         , "(list)[1, 2, 3, 4] "),
-        ([1, 2, 3, 4, 5]      , "(list _count_:5)[1, 2, 3, 4, 5] "),
-        ([1, 2, 3, 4, 5, 6]   , "(list _count_:6)[1, 2, 3, 4, 5, 6] "),
-        ([1, 2, 3, 4, 5, 6, 7], "(list _count_:7)[1, 2, 3, 4, 5, 6, <Limit>] "),
+        ([1, 2, 3, 4]         , "[1, 2, 3, 4] "),
+        ([1, 2, 3, 4, 5]      , "(_count_:5)[1, 2, 3, 4, 5] "),
+        ([1, 2, 3, 4, 5, 6]   , "(_count_:6)[1, 2, 3, 4, 5, 6] "),
+        ([1, 2, 3, 4, 5, 6, 7], "(_count_:7)[1, 2, 3, 4, 5, 6, <Limit>] "),
 
         # dict
-        ({1:'A',2:'B',3:'C',4:'D'}                  , "(dict){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D'} "),
-        ({1:'A',2:'B',3:'C',4:'D',5:'E'}            , "(dict _count_:5){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E'} "),
-        ({1:'A',2:'B',3:'C',4:'D',5:'E',6:'F'}      , "(dict _count_:6){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E', 6:: 'F'} "),
-        ({1:'A',2:'B',3:'C',4:'D',5:'E',6:'F',7:'G'}, "(dict _count_:7){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E', 6:: 'F', <Limit>} "),
+        ({1:'A',2:'B',3:'C',4:'D'}                  , "{1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D'} "),
+        ({1:'A',2:'B',3:'C',4:'D',5:'E'}            , "(_count_:5){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E'} "),
+        ({1:'A',2:'B',3:'C',4:'D',5:'E',6:'F'}      , "(_count_:6){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E', 6:: 'F'} "),
+        ({1:'A',2:'B',3:'C',4:'D',5:'E',6:'F',7:'G'}, "(_count_:7){1:: 'A', 2:: 'B', 3:: 'C', 4:: 'D', 5:: 'E', 6:: 'F', <Limit>} "),
 
         # bytes
         (b'\x40'                            , "(bytes)[40 | @] "),

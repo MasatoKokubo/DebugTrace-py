@@ -62,9 +62,7 @@ class LogBuffer(object):
         Returns:
             LogBuffer: This object
         '''
-    # 1.0.3
         if value is not None:
-    ####
             string = str(value)
             if not no_break and self.length > 0 and self.length + len(string) > self._maximum_data_output_width:
                 self.line_feed()
@@ -85,8 +83,6 @@ class LogBuffer(object):
         '''
         return self.append(value, 0, True)
 
-# 1.0.3
-#   def append_buffer(self, buff: __class__) -> __class__:
     def append_buffer(self, separator: str, buff: __class__) -> __class__:
         '''
         Appends lines of another LogBuffer.
@@ -98,16 +94,12 @@ class LogBuffer(object):
         Returns:
             LogBuffer: This object
         '''
-    # 1.0.3
         if separator is not None:
             self.append(separator, 0, True)
-    ####
         index = 0
         for line in buff.lines:
             if index > 0:
                 self.line_feed()
-        # 1.0.3
-        #   self.append(line[1], line[0])
             self.append(line[1], line[0], index == 0 and separator is not None)
             index += 1
         return self

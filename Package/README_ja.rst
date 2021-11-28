@@ -64,32 +64,32 @@ DebugTrace-py
 ログの出力内容:
 ::
 
-    2021-08-12 17:43:07.772235 DebugTrace-py 1.0.3
-    2021-08-12 17:43:07.772286   config file path: <No config file>
-    2021-08-12 17:43:07.772322 　logger: sys.stderr
-    2021-08-12 17:43:07.772346 
-    2021-08-12 17:43:07.774450 Enter func1 (ReadmeExample.py:22)
-    2021-08-12 17:43:07.774588 | Hello, World! (ReadmeExample.py:23)
-    2021-08-12 17:43:07.774674 | Enter func2 (ReadmeExample.py:14)
-    2021-08-12 17:43:07.774739 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2021-08-12 17:43:07.774780 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000007
-    2021-08-12 17:43:07.774838 | | 
-    2021-08-12 17:43:07.774868 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2021-08-12 17:43:07.774913 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
-    2021-08-12 17:43:07.775289 | | 
-    2021-08-12 17:43:07.775318 | | contacts = (list)[
-    2021-08-12 17:43:07.775350 | |   (__main__.Contact){
-    2021-08-12 17:43:07.775373 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
-    2021-08-12 17:43:07.775395 | |     lastName: (length:5)'Apple'
-    2021-08-12 17:43:07.775419 | |   },
-    2021-08-12 17:43:07.775447 | |   (__main__.Contact){
-    2021-08-12 17:43:07.775460 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
-    2021-08-12 17:43:07.775479 | |     lastName: (length:5)'Apple'
-    2021-08-12 17:43:07.775489 | |   }
-    2021-08-12 17:43:07.775517 | | ] (ReadmeExample.py:19)
-    2021-08-12 17:43:07.775543 | | 
-    2021-08-12 17:43:07.775574 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000840
-    2021-08-12 17:43:07.775591 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001083
+    2021-11-27 12:31:10.543520 DebugTrace-py 1.1.0
+    2021-11-27 12:31:10.543564   config file path: <No config file>
+    2021-11-27 12:31:10.543591 　logger: sys.stderr
+    2021-11-27 12:31:10.543611 
+    2021-11-27 12:31:10.544491 Enter func1 (ReadmeExample.py:22)
+    2021-11-27 12:31:10.544561 | Hello, World! (ReadmeExample.py:23)
+    2021-11-27 12:31:10.544619 | Enter func2 (ReadmeExample.py:14)
+    2021-11-27 12:31:10.544684 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2021-11-27 12:31:10.544722 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000005
+    2021-11-27 12:31:10.544777 | | 
+    2021-11-27 12:31:10.544806 | | Enter Contact.__init__ (ReadmeExample.py:7)
+    2021-11-27 12:31:10.544840 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
+    2021-11-27 12:31:10.545193 | | 
+    2021-11-27 12:31:10.545220 | | contacts = [
+    2021-11-27 12:31:10.545243 | |   (__main__.Contact){
+    2021-11-27 12:31:10.545266 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
+    2021-11-27 12:31:10.545295 | |     lastName: (length:5)'Apple'
+    2021-11-27 12:31:10.545318 | |   },
+    2021-11-27 12:31:10.545345 | |   (__main__.Contact){
+    2021-11-27 12:31:10.545368 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
+    2021-11-27 12:31:10.545395 | |     lastName: (length:5)'Apple'
+    2021-11-27 12:31:10.545417 | |   }
+    2021-11-27 12:31:10.545444 | | ] (ReadmeExample.py:19)
+    2021-11-27 12:31:10.545470 | | 
+    2021-11-27 12:31:10.545506 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000824
+    2021-11-27 12:31:10.545537 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001010
 
 4. 関数
 =========================
@@ -256,6 +256,19 @@ MIT ライセンス(MIT)
 
 7. リリースノート
 ==================
+
+``DebugTrace-py 1.1.0 - 2021-11-28``
+------------------------------------
+
+* ``__str__`` または ``__repr__`` を実装しているクラスのオブジェクトを出力するとエラーになる不具合を修正しました。
+* ``tuple``, ``set``, ``dict`` のデータ型を出力しないようにしました。
+    | ``(1, 2, 3)`` ← ``(tuple)(1, 2, 3)``
+    | ``(1,)`` ← ``(tuple)(1)``
+    | ``()`` ← ``(tuple)()``
+    | ``{1, 2, 3}`` ← ``(set){1, 2, 3}``
+    | ``{}`` ← ``(set){}``
+    | ``{1: 'A', 2: 'B', 3; 'C'}`` ← ``(dict){1: 'A', 2: 'B', 3; 'C'}``
+    | ``{:}`` ← ``(dict){}``
 
 ``DebugTrace-py 1.0.3 - 2021-08-12``
 ------------------------------------

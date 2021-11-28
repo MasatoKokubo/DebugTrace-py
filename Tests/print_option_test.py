@@ -1,3 +1,4 @@
+# print_option_test.py
 from __future__ import annotations
 import unittest
 from parameterized import parameterized
@@ -98,11 +99,11 @@ class PrintOptionTest(unittest.TestCase):
 
     # collection_limit
     @parameterized.expand([
-        (None, 'values = (list count:5)[1, 2, 3, 4, 5]'),
-        (   4, 'values = (list count:5)[1, 2, 3, 4, ...]'),
-        (   1, 'values = (list count:5)[1, ...]'),
-        (   0, 'values = (list count:5)[...]'),
-        (  -1, 'values = (list count:5)[...]')
+        (None, 'values = (count:5)[1, 2, 3, 4, 5]'),
+        (   4, 'values = (count:5)[1, 2, 3, 4, ...]'),
+        (   1, 'values = (count:5)[1, ...]'),
+        (   0, 'values = (count:5)[...]'),
+        (  -1, 'values = (count:5)[...]')
     ])
     def test_collection_limit(self, limit: int, expected: str) -> None:
         values = [1, 2, 3, 4, 5]

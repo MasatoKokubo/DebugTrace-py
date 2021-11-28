@@ -1,3 +1,4 @@
+# line_break_test.py
 from datetime import date
 import unittest
 import debugtrace
@@ -21,10 +22,6 @@ class Contacts(object):
         self.contact4 = contact4
 
 class LineBreakTest(unittest.TestCase):
-#   @classmethod
-#   def setUpClass(cls):
-#       debugtrace.init('./Tests/debugtrace_test.ini')
-
     maximum_data_output_width: int
 
     def setUp(self):
