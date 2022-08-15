@@ -1,4 +1,5 @@
 # print_option_test.py
+# (C) 2020 Masato Kokubo
 from __future__ import annotations
 import unittest
 from parameterized import parameterized
@@ -19,7 +20,7 @@ class Point(object):
     def y(self) -> int:
         return self._y
 
-    def transpose(self) -> __class__:
+    def transpose(self) -> Point:
         return Point(self._y, self._x)
 
     def __str__(self) -> str:
@@ -49,7 +50,7 @@ class Point3(object):
         return '(' + str(self._x) + ', ' + str(self._y) + ', ' + str(self._z) + ')'
 
 class N(object):
-    def __init__(self, n: __class__ = None):
+    def __init__(self, n: N = None):
         self.n = n
 
 class PrintOptionTest(unittest.TestCase):
@@ -57,11 +58,11 @@ class PrintOptionTest(unittest.TestCase):
 
     def setUp(self):
         global maximum_data_output_width
-        maximum_data_output_width = debugtrace.main._maximum_data_output_width
-        debugtrace.main._maximum_data_output_width = 140
+        maximum_data_output_width = debugtrace.main._config.maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = 140
 
     def cleanUp(self):
-        debugtrace.main._maximum_data_output_width = maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = maximum_data_output_width
 
     # force_reflection
     def test_force_reflection(self) -> None:
@@ -99,11 +100,10 @@ class PrintOptionTest(unittest.TestCase):
 
     # collection_limit
     @parameterized.expand([
-        (None, 'values = (count:5)[1, 2, 3, 4, 5]'),
-        (   4, 'values = (count:5)[1, 2, 3, 4, ...]'),
-        (   1, 'values = (count:5)[1, ...]'),
-        (   0, 'values = (count:5)[...]'),
-        (  -1, 'values = (count:5)[...]')
+        (  -1, 'values = [1, 2, 3, 4, 5]'),
+        (   4, 'values = [1, 2, 3, 4, ...]'),
+        (   1, 'values = [1, ...]'),
+        (   0, 'values = [...]'),
     ])
     def test_collection_limit(self, limit: int, expected: str) -> None:
         values = [1, 2, 3, 4, 5]
@@ -113,11 +113,10 @@ class PrintOptionTest(unittest.TestCase):
 
     # string_limit
     @parameterized.expand([
-        (None, "string = (length:5)'ABCDE'"),
-        (   4, "string = (length:5)'ABCD...'"),
-        (   1, "string = (length:5)'A...'"),
-        (   0, "string = (length:5)'...'"),
-        (  -1, "string = (length:5)'...'")
+        (  -1, "string = 'ABCDE'"),
+        (   4, "string = 'ABCD...'"),
+        (   1, "string = 'A...'"),
+        (   0, "string = '...'"),
     ])
     def test_string_limit(self, limit: int, expected: str) -> None:
         string = "ABCDE"
@@ -127,11 +126,10 @@ class PrintOptionTest(unittest.TestCase):
 
     # bytes_limit
     @parameterized.expand([
-        (None, 'bytes_ = (bytes length:5)[41 42 43 44 45 | ABCDE]'),
-        (   4, 'bytes_ = (bytes length:5)[41 42 43 44 ...| ABCD]'),
-        (   1, 'bytes_ = (bytes length:5)[41 ...| A]'),
-        (   0, 'bytes_ = (bytes length:5)[...| ]'),
-        (  -1, 'bytes_ = (bytes length:5)[...| ]')
+        (  -1, 'bytes_ = (bytes)[41 42 43 44 45 | ABCDE]'),
+        (   4, 'bytes_ = (bytes)[41 42 43 44 ...| ABCD]'),
+        (   1, 'bytes_ = (bytes)[41 ...| A]'),
+        (   0, 'bytes_ = (bytes)[...| ]'),
     ])
     def test_bytes_limit(self, limit: int, expected: str) -> None:
         bytes_ = b'\x41\x42\x43\x44\x45'
@@ -141,12 +139,11 @@ class PrintOptionTest(unittest.TestCase):
 
     # reflection_nest_limit
     @parameterized.expand([
-        (None, 'n = (__main__.N){n: (__main__.N){n: (__main__.N){n: (__main__.N){n: (__main__.N){n: ...}}}}}'),
+        (  -1, 'n = (__main__.N){n: (__main__.N){n: (__main__.N){n: (__main__.N){n: (__main__.N){n: ...}}}}}'),
         (   3, 'n = (__main__.N){n: (__main__.N){n: (__main__.N){n: (__main__.N){n: ...}}}}'),
         (   2, 'n = (__main__.N){n: (__main__.N){n: (__main__.N){n: ...}}}'),
         (   1, 'n = (__main__.N){n: (__main__.N){n: ...}}'),
         (   0, 'n = (__main__.N){n: ...}'),
-        (  -1, 'n = ...')
     ])
     def test_reflection_nest_limit(self, limit: int, expected: str) -> None:
         n = N(N(N(N(N(N())))))

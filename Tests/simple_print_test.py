@@ -1,4 +1,5 @@
 # simple_print_test.py
+# (C) 2020 Masato Kokubo
 from datetime import date
 from datetime import time
 from datetime import datetime
@@ -21,7 +22,7 @@ class SimplePrintTest(unittest.TestCase):
         ("'A'"  , "\"'A'\""),
         ('"A"'  , '\'"A"\''),
         ('"A\'' , "'\"A\\''"),
-        ('ABCDE', "(length:5)'ABCDE'"),
+        ('ABCDE', "'ABCDE'"),
         ('\\'    , "'\\\\'"),
         ('\n'    , "'\\n'"),
         ('\r'    , "'\\r'"),
@@ -35,9 +36,9 @@ class SimplePrintTest(unittest.TestCase):
         ('\x18\x19\x1A\x1B' , "'\\x18\\x19\\x1A\\x1B'"),
         ('\x1C\x1D\x1E\x1F' , "'\\x1C\\x1D\\x1E\\x1F'"),
         (          b'\x00\x01\x02\x03'     , '(bytes)[00 01 02 03 | ....]'),
-        (          b'\x30\x31\x32\x33\x34' , '(bytes length:5)[30 31 32 33 34 | 01234]'),
+        (          b'\x30\x31\x32\x33\x34' , '(bytes)[30 31 32 33 34 | 01234]'),
         (bytearray(b'\x00\x01\x02\x03'    ), '(bytearray)[00 01 02 03 | ....]'),
-        (bytearray(b'\x30\x31\x32\x33\x34'), '(bytearray length:5)[30 31 32 33 34 | 01234]'),
+        (bytearray(b'\x30\x31\x32\x33\x34'), '(bytearray)[30 31 32 33 34 | 01234]'),
         (date(2020, 3, 1), '2020-03-01'),
         (time( 1,  2,  3), '01:02:03'),
         (time(23, 48, 59), '23:48:59'),

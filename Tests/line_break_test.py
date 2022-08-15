@@ -1,4 +1,5 @@
 # line_break_test.py
+# (C) 2020 Masato Kokubo
 from datetime import date
 import unittest
 import debugtrace
@@ -26,11 +27,11 @@ class LineBreakTest(unittest.TestCase):
 
     def setUp(self):
         global maximum_data_output_width
-        maximum_data_output_width = debugtrace.main._maximum_data_output_width
-        debugtrace.main._maximum_data_output_width = 60
+        maximum_data_output_width = debugtrace.main._config.maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = 60
 
     def cleanUp(self):
-        debugtrace.main._maximum_data_output_width = maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = maximum_data_output_width
 
     def test_line_break_of_iterable(self) -> None:
         contacts = [
@@ -46,7 +47,7 @@ class LineBreakTest(unittest.TestCase):
         self.assertTrue('  birthday:'     in debugtrace.last_print_string())
         self.assertTrue(', first_name: '  in debugtrace.last_print_string())
         self.assertTrue('  last_name:'    in debugtrace.last_print_string())
-        self.assertTrue('  phone_number:' in debugtrace.last_print_string())
+        self.assertTrue(', phone_number:' in debugtrace.last_print_string())
         self.assertTrue('},\n  (__main__.Contact){' in debugtrace.last_print_string())
         self.assertTrue('},\n  None, None' in debugtrace.last_print_string())
 
@@ -64,7 +65,7 @@ class LineBreakTest(unittest.TestCase):
         self.assertTrue('  birthday:'     in debugtrace.last_print_string())
         self.assertTrue(', first_name: '  in debugtrace.last_print_string())
         self.assertTrue('  last_name:'    in debugtrace.last_print_string())
-        self.assertTrue('  phone_number:' in debugtrace.last_print_string())
+        self.assertTrue(', phone_number:' in debugtrace.last_print_string())
         self.assertTrue('},\n  contact2: (__main__.Contact){' in debugtrace.last_print_string())
         self.assertTrue('},\n  contact3: None, contact4: None' in debugtrace.last_print_string())
 

@@ -1,4 +1,5 @@
 # collection_print_test.py
+# (C) 2020 Masato Kokubo
 import unittest
 from parameterized import parameterized
 import debugtrace

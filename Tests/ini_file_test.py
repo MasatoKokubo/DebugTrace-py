@@ -1,11 +1,12 @@
 # ini_file_test.py
+# (C) 2020 Masato Kokubo
 from __future__ import annotations
 import unittest
 from parameterized import parameterized
 import debugtrace
 
 class Node(object):
-    def __init__(self, next: __class__ = None):
+    def __init__(self, next: Node = None):
         self.next = next
 
 class IniFileTest(unittest.TestCase):
@@ -17,11 +18,11 @@ class IniFileTest(unittest.TestCase):
 
     def setUp(self):
         global maximum_data_output_width
-        maximum_data_output_width = debugtrace.main._maximum_data_output_width
-        debugtrace.main._maximum_data_output_width = 140
+        maximum_data_output_width = debugtrace.main._config.maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = 140
 
     def cleanUp(self):
-        debugtrace.main._maximum_data_output_width = maximum_data_output_width
+        debugtrace.main._config.maximum_data_output_width = maximum_data_output_width
 
     def func(self) -> None:
         _ = debugtrace.enter()
@@ -87,7 +88,7 @@ class IniFileTest(unittest.TestCase):
     # data_indent_string
     # maximum_data_output_width
     def test_data_indent_string(self) -> None:
-        debugtrace.main._maximum_data_output_width = 30
+        debugtrace.main._config.maximum_data_output_width = 30
         debugtrace.LogBuffer.maximum_data_output_width = 30
 
         debugtrace.print('value', [1111, 2222, 3333, 4444, 5555])

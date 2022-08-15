@@ -1,4 +1,5 @@
 # str_repl_test.py
+# (C) 2020 Masato Kokubo
 import unittest
 import debugtrace
 
@@ -55,11 +56,11 @@ class ClassTest(unittest.TestCase):
 
     def setUp(self):
         global minimum_output_length
-        minimum_output_length = debugtrace.main._minimum_output_length
-        debugtrace.main._minimum_output_length = 64
+        minimum_output_length = debugtrace.main._config.minimum_output_length
+        debugtrace.main._config.minimum_output_length = 64
 
     def cleanUp(self):
-        debugtrace.main._minimum_output_length = minimum_output_length
+        debugtrace.main._config.minimum_output_length = minimum_output_length
 
     def test_no__str__repr__(self) -> None:
         _ = debugtrace.enter()

@@ -38,63 +38,64 @@ The following is an example of a Python program using DebugTrace-py and a log wh
 
 ::
 
-    # ReadmeExample.py
+    # readme_example.py
     import datetime
-    import debugtrace # ToDo: Remove after debugging
+    import debugtrace # TODO: Remove after debugging
 
     # Contact class
     class Contact(object):
         def __init__(self, id: int, firstName: str, lastName: str, birthday: datetime.date) -> None:
-            _ = debugtrace.enter(self) # ToDo: Remove after debugging
+            _ = debugtrace.enter(self) # TODO: Remove after debugging
             self.id = id
             self.firstName = firstName
             self.lastName  = lastName
             self.birthday  = birthday
 
     def func2():
-        _ = debugtrace.enter() # ToDo: Remove after debugging
+        _ = debugtrace.enter() # TODO: Remove after debugging
         contact = [
             Contact(1, 'Akane' , 'Apple', datetime.date(1991, 2, 3)),
             Contact(2, 'Yukari', 'Apple', datetime.date(1992, 3, 4))
         ]
-        debugtrace.print('contact', contact) # ToDo: Remove after debugging
+        debugtrace.print('contact', contact) # TODO: Remove after debugging
 
     def func1():
-        _ = debugtrace.enter() # ToDo: Remove after debugging
-        debugtrace.print('Hello, World!') # ToDo: Remove after debugging
+        _ = debugtrace.enter() # TODO: Remove after debugging
+        debugtrace.print('Hello, World!') # TODO: Remove after debugging
         func2()
 
     func1()
 
 Log output contents:
+
 ::
 
-    2021-11-27 12:31:10.543520 DebugTrace-py 1.1.0
-    2021-11-27 12:31:10.543564   config file path: <No config file>
-    2021-11-27 12:31:10.543591 　logger: sys.stderr
-    2021-11-27 12:31:10.543611 
-    2021-11-27 12:31:10.544491 Enter func1 (ReadmeExample.py:22)
-    2021-11-27 12:31:10.544561 | Hello, World! (ReadmeExample.py:23)
-    2021-11-27 12:31:10.544619 | Enter func2 (ReadmeExample.py:14)
-    2021-11-27 12:31:10.544684 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2021-11-27 12:31:10.544722 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000005
-    2021-11-27 12:31:10.544777 | | 
-    2021-11-27 12:31:10.544806 | | Enter Contact.__init__ (ReadmeExample.py:7)
-    2021-11-27 12:31:10.544840 | | Leave Contact.__init__ (ReadmeExample.py:7) duration: 0:00:00.000004
-    2021-11-27 12:31:10.545193 | | 
-    2021-11-27 12:31:10.545220 | | contacts = [
-    2021-11-27 12:31:10.545243 | |   (__main__.Contact){
-    2021-11-27 12:31:10.545266 | |     birthday: 1991-02-03, firstName: (length:5)'Akane', id: 1,
-    2021-11-27 12:31:10.545295 | |     lastName: (length:5)'Apple'
-    2021-11-27 12:31:10.545318 | |   },
-    2021-11-27 12:31:10.545345 | |   (__main__.Contact){
-    2021-11-27 12:31:10.545368 | |     birthday: 1992-03-04, firstName: (length:6)'Yukari', id: 2,
-    2021-11-27 12:31:10.545395 | |     lastName: (length:5)'Apple'
-    2021-11-27 12:31:10.545417 | |   }
-    2021-11-27 12:31:10.545444 | | ] (ReadmeExample.py:19)
-    2021-11-27 12:31:10.545470 | | 
-    2021-11-27 12:31:10.545506 | Leave func2 (ReadmeExample.py:14) duration: 0:00:00.000824
-    2021-11-27 12:31:10.545537 Leave func1 (ReadmeExample.py:22) duration: 0:00:00.001010
+    2022-08-15 13:19:11.080752 DebugTrace-py 1.2.0 on Python 3.10.4
+    2022-08-15 13:19:11.080803   config file path: <No config file>
+    2022-08-15 13:19:11.080834   logger: sys.stderr
+    2022-08-15 13:19:11.080901 
+    2022-08-15 13:19:11.080926 ______________________________ MainThread #139879021757504 ______________________________
+    2022-08-15 13:19:11.080953 
+    2022-08-15 13:19:11.081716 Enter func1 (readme_example.py:22)
+    2022-08-15 13:19:11.081791 | Hello, World! (readme_example.py:23)
+    2022-08-15 13:19:11.081853 | Enter func2 (readme_example.py:14)
+    2022-08-15 13:19:11.081919 | | Enter Contact.__init__ (readme_example.py:7)
+    2022-08-15 13:19:11.081964 | | Leave Contact.__init__ (readme_example.py:7) duration: 0:00:00.000010
+    2022-08-15 13:19:11.082032 | | 
+    2022-08-15 13:19:11.082059 | | Enter Contact.__init__ (readme_example.py:7)
+    2022-08-15 13:19:11.082105 | | Leave Contact.__init__ (readme_example.py:7) duration: 0:00:00.000009
+    2022-08-15 13:19:11.082439 | | 
+    2022-08-15 13:19:11.082467 | | contacts = [
+    2022-08-15 13:19:11.082498 | |   (__main__.Contact){
+    2022-08-15 13:19:11.082521 | |     birthday: 1991-02-03, firstName: 'Akane', id: 1, lastName: 'Apple'
+    2022-08-15 13:19:11.082543 | |   },
+    2022-08-15 13:19:11.082566 | |   (__main__.Contact){
+    2022-08-15 13:19:11.082595 | |     birthday: 1992-03-04, firstName: 'Yukari', id: 2, lastName: 'Apple'
+    2022-08-15 13:19:11.082618 | |   }
+    2022-08-15 13:19:11.082638 | | ] (readme_example.py:19)
+    2022-08-15 13:19:11.082651 | | 
+    2022-08-15 13:19:11.082678 | Leave func2 (readme_example.py:14) duration: 0:00:00.000792
+    2022-08-15 13:19:11.082709 Leave func1 (readme_example.py:22) duration: 0:00:00.000957
 
 4. Functions
 ============
@@ -161,10 +162,13 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - Default Value
     * - ``logger``
       - | The logger used by debugtrace
-        | ``StdOut: Output to sys.stdout``
-        | ``StdErr: Output to sys.stderr``
-        | ``Logger: Output using logging package``
-      - ``StdErr``
+        |
+        | Specifiable Values:
+        | ``stdout -`` Output to ``sys.stdout``
+        | ``stderr -`` Output to ``sys.stderr``
+        | ``logger -`` Output using ``logging`` package
+        | ``file:`` <log file path> ``-`` Output directly to the file
+      - ``stderr``
     * - ``logging_config_file``
       - The configuration file name specified in logging package
       - ``logging.conf``
@@ -172,10 +176,19 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - The logger name when using the logging package
       - ``debugtrace``
     * - ``logging_level``
-      - The log level when using the logging package
+      - | The log level when using the logging package
+        |
+        | Specifiable Values:
+        | ``CRITICAL``
+        | ``ERROR``
+        | ``WARNING``
+        | ``INFO``
+        | ``DEBUG``
+        | ``NOTSET``
       - ``DEBUG``
     * - ``is_enabled``
-      - | ``False: Log output is disabled``
+      - | Specifiable Values:
+        | ``False: Log output is disabled``
         | ``True: Log output is enabled``
       - ``True``
     * - ``enter_format``
@@ -191,9 +204,14 @@ You can specify the following options in the ``debugtrace.ini`` file.
         | ``{2}: The line number``
         | ``{3}: The time from entering``
       - ``Leave {0} ({1}:{2}) duration: {3}``
+    * - ``thread_boundary_format``
+      - | The format string of logging at threads boundary
+        | ``{0}: The thread name``
+        | ``{1}: The thread ID``
+      - ``______________________________ {0} #{1} ______________________________``
     * - ``maximum_indents``
       - The maximum number of indents
-      - ``20``
+      - ``32``
     * - ``indent_string``
       - The indentation string for code
       - ``|\s``
@@ -224,13 +242,15 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - ``count:{}``
     * - ``minimum_output_count``
       - The minimum value to output the number of elements such as ``list``, ``tuple`` and ``dict``
-      - ``5``
+      - | ``16`` *(since 1.2.0)*
+        | ``5`` *(until 1.1.0)*
     * - ``length_format``
       - The format string of the length of string and ``bytes``
       - ``length:{}``
     * - ``minimum_output_length``
       - The minimum value to output the length of string and ``bytes``
-      - ``5``
+      - | ``16`` *(since 1.2.0)*
+        | ``5`` *(until 1.1.0)*
     * - ``log_datetime_format``
       - | Log date and time format when ``logger`` is ``StdOut`` or ``StdErr``
         | (Currently not configurable)
@@ -243,13 +263,16 @@ You can specify the following options in the ``debugtrace.ini`` file.
       - ``16``
     * - ``collection_limit``
       - The limit value of elements such as ``list``, ``tuple`` and ``dict`` to output
-      - ``512``
+      - | ``128`` *(since 1.2.0)*
+        | ``512`` *(until 1.1.0)*
     * - ``bytes_limit``
       - The limit value of elements for ``bytes`` and ``bytearray``  to output
-      - ``8192``
+      - | ``256`` *(since 1.2.0)*
+        | ``8192`` *(until 1.1.0)*
     * - ``string_limit``
       - The limit value of characters for string to output
-      - ``8192``
+      - | ``256`` *(since 1.2.0)*
+        | ``8192`` *(until 1.1.0)*
     * - ``reflection_nest_limit``
       - The The limit value for reflection nesting
       - ``4``
@@ -263,6 +286,36 @@ MIT License (MIT)
 
 7. Release notes
 ================
+
+``DebugTrace-py 1.2.0 - August 15, 2022``
+-----------------------------------------
+
+* Added the runtime Python version to the startup log.
+* Changed to output a log that shows thread switching.
+* Changed default values for the following properties.
+
+.. list-table::
+    :widths: 17, 12, 12
+    :header-rows: 1
+
+    * - Property Name
+      - New Default Value
+      - Old Default Value
+    * - minimum_output_count
+      - 16
+      - 5
+    * - minimum_output_length
+      - 16
+      - 5
+    * - collection_limit
+      - 128
+      - 512
+    * - string_limit
+      - 256
+      - 8192
+    * - bytes_limit
+      - 256
+      - 8192
 
 ``DebugTrace-py 1.1.0 - November 28, 2021``
 -------------------------------------------
