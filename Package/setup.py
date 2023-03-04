@@ -7,7 +7,7 @@ import os
 from setuptools import setup, find_packages
 
 try:
-    with open('README.rst') as f:
+    with open('README.md') as f:
         readme = f.read()
 except IOError:
     readme = ''
@@ -32,6 +32,7 @@ setup(
     maintainer_email='masatokokubo@gmail.com',
     description='Output trace logs when debugging Python programs',
     long_description=readme,
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     install_requires=[],
     license="MIT",

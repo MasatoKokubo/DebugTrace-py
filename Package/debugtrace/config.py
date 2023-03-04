@@ -10,7 +10,27 @@ import typing
 from debugtrace import _print as pr
 
 class Config(object):
+    """
+    Retains the contents set in debugtrace.ini.
+
+    ---- Japanese ----
+
+    debugtrace.iniで設定されている内容保持します。
+    """
     def __init__(self, config_path:str):
+        """
+        Reads the file in the specified path and retains the settings.
+        
+        Args:
+            config_path (str): Configuration file path
+
+        ---- Japanese ----
+
+        指定のパスのファイルを読み込み設定内容を保持します。
+
+        引数:
+            config_path (str): 設定ファイルのパス
+        """
         self.config_path = config_path
         self._config_parser = configparser.ConfigParser()
         if os.path.exists(self.config_path):
@@ -21,9 +41,8 @@ class Config(object):
         self.logger_name               = typing.cast(str , self._get_config_value('logger'                      , 'stderr'      ))
         self.logging_config_file       = typing.cast(str , self._get_config_value('logging_config_file'         , 'logging.conf'))
         self.logging_logger_name       = typing.cast(str , self._get_config_value('logging_logger_name'         , 'debugtrace'  ))
-        self.logging_level             = typing.cast(str , self._get_config_value('logging_level'               , 'DEBUG'       )).upper()
         self.is_enabled                = typing.cast(bool, self._get_config_value('is_enabled'                  , True          ))
-        self.enter_format              = typing.cast(str , self._get_config_value('enter_format'                , 'Enter {0} ({1}:{2})'     ))
+        self.enter_format              = typing.cast(str , self._get_config_value('enter_format'                , 'Enter {0} ({1}:{2}) <- ({3}:{4})'))
         self.leave_format              = typing.cast(str , self._get_config_value('leave_format'                , 'Leave {0} ({1}:{2}) duration: {3}'))
         self.thread_boundary_format    = typing.cast(str , self._get_config_value('thread_boundary_format'      , '______________________________ {0} #{1} ______________________________')) # since 1.2.0
         self.maximum_indents           = typing.cast(int , self._get_config_value('maximum_indents'             , 32   ))
@@ -39,7 +58,7 @@ class Config(object):
         self.minimum_output_count      = typing.cast(int , self._get_config_value('minimum_output_count'        , 16          )) # 16 <- 5 since 1.2.0
         self.length_format             = typing.cast(str , self._get_config_value('length_format'               , 'length:{}' ))
         self.minimum_output_length     = typing.cast(int , self._get_config_value('minimum_output_length'       , 16          )) # 16 <- 5 since 1.2.0
-        self.log_datetime_format       = typing.cast(str , self._get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f'))
+        self.log_datetime_format       = typing.cast(str , self._get_config_value('log_datetime_format'         , '%Y-%m-%d %H:%M:%S.%f%z'))
         self.maximum_data_output_width = typing.cast(int , self._get_config_value('maximum_data_output_width'   , 70 ))
         self.bytes_count_in_line       = typing.cast(int , self._get_config_value('bytes_count_in_line'         , 16 ))
         self.collection_limit          = typing.cast(int , self._get_config_value('collection_limit'            , 128)) # 128 <- 512 since 1.2.0
@@ -57,6 +76,17 @@ class Config(object):
 
         Returns:
             object: Value related the key
+
+        ---- Japanese ----
+
+        debugtrace.ini ファイルからキーに関連する値を取得します。
+
+        引数:
+            key (str): キー
+            fallback (object): キーに関連する値が未定義の場合に返す値
+
+        戻り値:
+            object: キーに関連する値
         """
         value = fallback
         try:

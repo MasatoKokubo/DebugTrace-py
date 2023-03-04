@@ -1,3 +1,3 @@
-[README (English)](Package/README.rst)
+[README (English)](Package/README.md)
 
-[README (Japanese)](Package/README_ja.rst)
+[README (Japanese)](Package/README_ja.md)

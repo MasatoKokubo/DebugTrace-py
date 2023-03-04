@@ -7,6 +7,10 @@ __author__  = 'Masato Kokubo <masatokokubo@gmail.com>'
 class LogBuffer(object):
     """
     Buffers logs.
+    
+    ---- Japanese ----
+
+    ログをバッファリングします。
     """
     __slots__ = [
         '_maximum_data_output_width',
@@ -19,6 +23,16 @@ class LogBuffer(object):
     def __init__(self, maximum_data_output_width: int) -> None:
         """
         Initializes this object.
+        
+        Args:
+            maximum_data_output_width (int): Maximum data output width
+
+        ---- Japanese ----
+
+        このオブジェクトを初期化します。
+
+        引数:
+            maximum_data_output_width (int): 最大データ出力幅
         """
         self._maximum_data_output_width = maximum_data_output_width
         self._nest_level = 0
@@ -33,6 +47,10 @@ class LogBuffer(object):
     def line_feed(self) -> None:
         """
         Breaks the current line.
+
+        ---- Japanese ----
+
+        現在の行を改行します。
         """
         self._lines.append((self._nest_level + self._append_nest_level, self._last_line.rstrip()))
         self._append_nest_level = 0
@@ -40,13 +58,21 @@ class LogBuffer(object):
 
     def up_nest(self) -> None:
         """
-        Ups the data nest level.
+        Ups the data nesting level.
+
+        ---- Japanese ----
+
+        データのネスト レベルを上げます。
         """
         self._nest_level += 1
 
     def down_nest(self) -> None:
         """
-        Downs the data nest level.
+        Downs the data nesting level.
+
+        ---- Japanese ----
+
+        データのネスト レベルを下げます。
         """
         self._nest_level -= 1
 
@@ -56,12 +82,24 @@ class LogBuffer(object):
 
         Args:
             value (object): The value to append
-            nest_level (int, optional): The nest level of the value. Defaults to 0
-            no_break (bool, optional): If true, does not break even if the maximum width is exceeded.
+            nest_level (int, optional): The nesting level of the value. Defaults to 0
+            no_break (bool, optional): If True, does not break even if the maximum width is exceeded.
                 Defaults to False
 
         Returns:
             LogBuffer: This object
+
+        ---- Japanese ----
+
+        値の文字列表現を追加します。
+        
+        引数:
+            value (object): 追加する値
+            nest_level (int, optional): 値のネストレベル。 デフォルトは0
+            no_break (bool, optional): true の場合、最大幅を超えてもブレークしない。デフォルトはFalse
+
+        戻り値:
+            LogBuffer: このオブジェクト
         """
         if value is not None:
             string = str(value)
@@ -81,6 +119,16 @@ class LogBuffer(object):
 
         Returns:
             LogBuffer: This object
+
+        ---- Japanese ----
+
+        値の文字列表現を追加します。最大幅を超えても改行しません。
+
+        引数:
+            value (オブジェクト): 追加する値
+
+        戻り値:
+            LogBuffer: このオブジェクト
         """
         return self.append(value, 0, True)
 
@@ -89,11 +137,22 @@ class LogBuffer(object):
         Appends lines of another LogBuffer.
 
         Args:
-            separator (str): The separator string to append if not ''
+            separator (str): Separator string to append. Do not append if empty.
             buff (LogBuffer): Another LogBuffer
 
         Returns:
             LogBuffer: This object
+
+        ---- Japanese ----
+
+        別のLogBufferの行を追加します。
+
+        引数:
+            separator (str): 追加するセパレーター文字列。空文字列なら追加しない
+            buff (LogBuffer): 別のLogBuffer
+
+        戻り値:
+            LogBuffer: このオブジェクト
         """
         if separator != '':
             self.append(separator, 0, True)
@@ -109,6 +168,10 @@ class LogBuffer(object):
     def length(self) -> int:
         """
         The length of the last line.
+
+        ---- Japanese ----
+
+        最後の行の長さ。
         """
         return len(self._last_line)
 
@@ -116,6 +179,10 @@ class LogBuffer(object):
     def is_multi_lines(self) -> bool:
         """
         True if multiple line, false otherwise.
+
+        ---- Japanese ----
+
+        複数行の場合はTrue、それ以外の場合はFalse。
         """
         return len(self._lines) > 1 or len(self._lines) == 1 and self.length > 0
 
@@ -123,6 +190,10 @@ class LogBuffer(object):
     def lines(self) -> list:
         """
         A list of tuple of data indentation level and log string.
+
+        ---- Japanese ----
+
+        データのインデント レベルとログ文字列のタプルのリスト。
         """
         lines = self._lines.copy()
         if self.length > 0:

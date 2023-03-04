@@ -50,6 +50,13 @@ def init(config_path: str = './debugtrace.ini'):
 
     Args:
         config_path (str): The path of the configuration file.
+
+    ---- Japanese ----
+
+    デバッグトレースを初期化します。
+
+    引数:
+        config_path (str): 構成ファイルのパス。
     """
     global _config
     global _logger
@@ -60,19 +67,15 @@ def init(config_path: str = './debugtrace.ini'):
     _last_print_buff = LogBuffer(_config.maximum_data_output_width)
 
     # Decides the logger class
-    _logger = loggers.StdErr()
+    _logger = loggers.StdErr(_config)
     if _config.logger_name.lower() == 'stdout':
-        _logger = loggers.StdOut()
+        _logger = loggers.StdOut(_config)
     elif _config.logger_name.lower() == 'stderr':
-        _logger = loggers.StdErr()
+        _logger = loggers.StdErr(_config)
     elif _config.logger_name.lower() == 'logger':
         _logger = loggers.Logger(_config)
     elif _config.logger_name.lower().startswith('file:'):
-        log_path = _config.logger_name[5:].strip()
-        if len(log_path) > 0:
-            _logger = loggers.File(log_path)
-        else:
-            pr._print('debugtrace: (' + _config.config_path + ') logger = ' + _config.logger_name + ': There is no file name.', sys.stderr)
+        _logger = loggers.File(_config)
     else:
         pr._print('debugtrace: (' + _config.config_path + ') logger = ' + _config.logger_name + ' is unknown', sys.stderr)
 
@@ -85,6 +88,10 @@ def init(config_path: str = './debugtrace.ini'):
 class _PrintOptions(object):
     """
     Hold output option values.
+
+    ---- Japanese ----
+
+    出力オプション値を保持します。
     """
     def __init__(self,
         force_reflection: bool,
@@ -97,14 +104,28 @@ class _PrintOptions(object):
         ) -> None:
         """
         Initializes this object.
+
         Args:
-            force_reflection (bool): If true, outputs using reflection even if it has a __str__or __repr__ method
-            output_private (bool): If true, also outputs private members when using reflection
-            output_method (bool): If true, also outputs method members when using reflection
+            force_reflection (bool): If True, outputs using reflection even if it has a __str__or __repr__ method
+            output_private (bool): If True, also outputs private members when using reflection
+            output_method (bool): If True, also outputs method members when using reflection
             collection_limit (int): Output limit of collection elements (overrides debugtarace.ini value)
             string_limit (int): Output limit of string characters (overrides debugtarace.ini value)
             bytes_limit (int): Output limit of byte array elements (overrides debugtarace.ini value)
             reflection_nest_limit (int): Nest limits when using reflection (overrides debugtarace.ini value)
+
+        ---- Japanese ----
+
+        このオブジェクトを初期化します。
+
+        引数:
+            force_reflection (bool): Trueの場合、__str__または__repr__メソッドがあってもリフレクションを使用して出力する
+            output_private (bool): Trueの場合、リフレクションの使用時にプライベートメンバーも出力する
+            output_method (bool): Trueの場合、リフレクションの使用時にメソッドメンバーも出力する
+            collection_limit (int): コレクション要素の出力制限 (debugtarace.ini値を上書き)
+            string_limit (int): 文字列文字の出力制限 (debugtarace.ini値を上書き)
+            bytes_limit (int): バイト配列要素の出力制限 (debugtarace.ini値を上書き)
+            Reflection_nest_limit (int): リフレクション使用時のネストの制限 (debugtarace.ini値を上書き)
         """
         self.force_reflection = force_reflection
         self.output_private   = output_private
@@ -117,8 +138,17 @@ class _PrintOptions(object):
 # since 1.2.0
 def _current_state() -> State:
     """
+    Returns the current indent state.
+
     Returns:
-        the current indent state.
+        State: the current indent state.
+
+    ---- Japanese ----
+
+    現在のインデント状態を返します。
+
+    戻り値 :
+        状態: 現在のインデント状態。
     """
     state: State
     thread_id = threading.current_thread().ident
@@ -136,11 +166,22 @@ def _get_indent_string(nest_level: int, data_nest_level: int) -> str:
     Returns a string with the current code indent combined with the data indent.
 
     Args:
-        nest_level (int): The code nest level
-        data_nest_level (int): The data nest level
+        nest_level (int): The code nesting level
+        data_nest_level (int): The data nesting level
 
     Returns:
-        a indent string
+        str: a indent string
+
+    ---- Japanese ----
+
+    現在のコード インデントとデータ インデントを組み合わせた文字列を返します。
+
+    引数:
+        nest_level (int): コードのネストレベル
+        data_nest_level (int): データのネストレベル
+
+    戻り値 :
+        str: インデント文字列
     """
     indent_str = _config.indent_string * min(max(0, nest_level), _config.maximum_indents)
     data_indent_str = _config.data_indent_string * min(max(0, data_nest_level), _config.maximum_indents)
@@ -157,6 +198,18 @@ def _to_string(name: str, value: object, print_options: _PrintOptions) -> LogBuf
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    名前と値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        name (str): 値に関連する名前
+        value (object): 値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     buff = LogBuffer(_config.maximum_data_output_width)
 
@@ -232,6 +285,17 @@ def _to_string_str(value: str, print_options: _PrintOptions) -> LogBuffer:
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    文字列値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        value (str): 文字列値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     has_single_quote = False
     has_double_quote = False
@@ -298,6 +362,17 @@ def _to_string_bytes(value: bytes, print_options: _PrintOptions) -> LogBuffer:
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    バイト値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        value (bytes): バイト値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     bytes_length = len(value)
     buff = LogBuffer(_config.maximum_data_output_width)
@@ -360,6 +435,17 @@ def _to_string_refrection(value: object, print_options: _PrintOptions) -> LogBuf
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    リフレクション付きの値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        value (bytes): 追加する値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     buff = LogBuffer(_config.maximum_data_output_width)
 
@@ -394,6 +480,17 @@ def _to_string_refrection_body(value: object, print_options: _PrintOptions) -> L
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    リフレクション付きの値の文字列表現の本体を含むLogBufferを返します。
+
+    引数:
+        value (bytes): 追加する値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     buff = LogBuffer(_config.maximum_data_output_width)
 
@@ -441,6 +538,17 @@ def _to_string_iterable(values: Collection, print_options: _PrintOptions) -> Log
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    反復可能な値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        value (object): 追加する反復可能な値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     open_char = '{' # set, frozenset, dict
     close_char = '}'
@@ -488,6 +596,17 @@ def _to_string_iterable_body(values: Iterable, print_options: _PrintOptions) -> 
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    反復可能な値の文字列表現の本体を含むLogBufferを返します。
+
+    引数:
+        value (object): 追加する反復可能な値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     buff = LogBuffer(_config.maximum_data_output_width)
 
@@ -532,6 +651,18 @@ def _to_string_key_value(key: object, value: object, print_options: _PrintOption
 
     Returns:
         LogBuffer: a LogBuffer
+
+    ---- Japanese ----
+
+    キーと値の文字列表現を含むLogBufferを返します。
+
+    引数:
+        key (object): 値に関連するキー
+        value (object): 値
+        print_options (_PrintOptions): 出力オプション
+
+    戻り値 :
+        LogBuffer: LogBuffer
     """
     buff = LogBuffer(_config.maximum_data_output_width)
     key_buff = _to_string('', key, print_options)
@@ -549,6 +680,17 @@ def _get_type_name(value: object, count: int = -1) -> str:
 
     Returns:
         str: The type name
+
+    ---- Japanese ----
+
+    値の型名を返します。
+
+    引数:
+        value (object): 値
+        count (int): コレクションの場合の値の要素数
+
+    戻り値 :
+        str: 型名
     """
     value_type = type(value)
     type_name = _get_simple_type_name(type(value), 0)
@@ -573,6 +715,17 @@ def _get_simple_type_name(value_type: type, nest: int) -> str:
 
     Returns:
         str: The simple type name
+
+    ---- Japanese ----
+
+    単純型名を返します。
+
+    引数:
+        value_type (type): タイプ
+        nest (int): このメソッド呼び出しのネストレベル
+
+    戻り値 :
+        str: 単純型名
     """
     type_name = str(value_type) if nest == 0 else value_type.__name__
     if type_name.startswith("<class '"):
@@ -599,10 +752,20 @@ def _has_str_repr_method(value: object) -> Tuple[bool, bool]:
     Returns true if the class of the value has __str__ or __repr__ method.
 
     Args:
-        value: The value
+        value (object): The value
 
     Returns:
         bool: True if the class of the value has __str__ or __repr__ method
+
+    ---- Japanese ----
+
+    値のクラスに__str__または__repr__メソッドがある場合、trueを返します。
+
+    引数:
+        value (object): 値
+
+    戻り値 :
+        bool: 値のクラスに__str__または__repr__メソッドがある場合はTrue
     """
     try:
         members = inspect.getmembers(value, lambda v: inspect.ismethod(v))
@@ -624,6 +787,10 @@ _DO_NOT_OUTPUT = 'Do not output'
 def _print_start():
     """
     Common start processing of output.
+
+    ---- Japanese ----
+
+    出力の共通開始処理。
     """
     global _before_thread_id
 
@@ -652,24 +819,24 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
     Args:
         name (str): The name of the value (simply output message if the value is omitted).
         value (object, optional): The value to output if not omitted.
-        force_reflection (bool, optional): If true, outputs using reflection even if it has a __str__ or __repr__ method. Defaults to False
-        output_private (bool, optional): If true, also outputs private members when using reflection. Defaults to False
-        output_method (bool, optional): If true, also outputs method members when using reflection. Defaults to False
+        force_reflection (bool, optional): If True, outputs using reflection even if it has a __str__ or __repr__ method. Defaults to False
+        output_private (bool, optional): If True, also outputs private members when using reflection. Defaults to False
+        output_method (bool, optional): If True, also outputs method members when using reflection. Defaults to False
         collection_limit (int, optional): Output limit of collection elements (overrides debugtarace.ini value). Defaults to 512
         string_limit (int, optional): Output limit of string characters (overrides debugtarace.ini value). Defaults to 8192
         bytes_limit (int, optional): Output limit of byte array elements (overrides debugtarace.ini value). Defaults to 8192
         reflection_nest_limit (int, optional): Nest limits when using reflection (overrides debugtarace.ini value). Defaults to 4
 
-    ---- Japanese from here ----
+    ---- Japanese ----
     
     名前と値を出力します。
 
     引数:
         name (str): 出力する名前 (valueが省略されている場合は、単に出力するメッセージ)
         value (object, optional): 出力する値 (省略されていなければ)
-        force_reflection (bool, optional): Trueなら __str__ または __repr__ メソッドが定義されていてもリフレクションを使用する。デフォルトはFalse
-        output_private (bool, optional): Trueならプライベートメンバーも出力する。デフォルトはFalse
-        output_method (bool, optional): Trueならメソッドも出力する。デフォルトはFalse
+        force_reflection (bool, optional): Trueの場合、__str__または__repr__メソッドが定義されていてもリフレクションを使用する。デフォルトはFalse
+        output_private (bool, optional): Trueの場合、プライベートメンバーも出力する。デフォルトはFalse
+        output_method (bool, optional): Trueの場合、メソッドも出力する。デフォルトはFalse
         collection_limit (int, optional): コレクションの要素の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは512
         string_limit (int, optional): 文字列値の出力文字数の制限 (debugtarace.iniの値より優先)。デフォルトは8192
         bytes_limit (int, optional): バイト配列bytesの内容の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは8192
@@ -720,6 +887,10 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
 class _DebugTrace(object):
     """
     Outputs a entering log when initializing and outputs an leaving log when deleting.
+
+    ---- Japanese ----
+
+    初期化時に進入ログを出力し、削除時に退出ログを出力します。
     """
     __slots__ = [
         'name',
@@ -733,6 +904,13 @@ class _DebugTrace(object):
 
         Args:
             invoker (object): The object or class that invoked this method.
+
+        ---- Japanese ----
+
+        このオブジェクトを初期化します。
+
+        引数:
+            invoker (object): このメソッドを呼び出したオブジェクトまたはクラス。
         """
         global _last_print_buff
 
@@ -755,12 +933,17 @@ class _DebugTrace(object):
             self.filename = os.path.basename(frame_summary.filename)
             self.lineno = frame_summary.lineno
 
+            parent_frame_summary = _get_frame_summary(5)
+            parent_filename = os.path.basename(parent_frame_summary.filename)
+            parent_lineno = parent_frame_summary.lineno
+
             indent_string = _get_indent_string(state.nest_level, 0)
             if state.nest_level < state.previous_nest_level or _last_print_buff.is_multi_lines:
                 _logger.print(indent_string) # Empty Line
 
             _last_print_buff = LogBuffer(_config.maximum_data_output_width)
-            _last_print_buff.no_break_append(_config.enter_format.format(self.name, self.filename, self.lineno))
+            _last_print_buff.no_break_append(
+                _config.enter_format.format(self.name, self.filename, self.lineno, parent_filename, parent_lineno))
             _last_print_buff.line_feed()
             _logger.print(indent_string + _last_print_buff.lines[0][1])
 
@@ -769,6 +952,10 @@ class _DebugTrace(object):
     def __del__(self):
         """
         Called when the instance is about to be destroyed.
+
+        ---- Japanese ----
+
+        インスタンスが破棄されようとしているときに呼び出されます。
         """
         global _last_print_buff
 
@@ -782,7 +969,7 @@ class _DebugTrace(object):
             if _last_print_buff.is_multi_lines:
                 _logger.print(_get_indent_string(state.nest_level, 0)) # Empty Line
 
-            time = datetime.datetime.now() - state.down_nest()
+            time = datetime.datetime.utcnow() - state.down_nest()
 
             _last_print_buff = LogBuffer(_config.maximum_data_output_width)
             _last_print_buff.no_break_append(_config.leave_format.format(self.name, self.filename, self.lineno, time))
@@ -796,13 +983,13 @@ def enter(invoker: object=None) -> _DebugTrace:
     Store the return value in some variable (such as _).
     Outputs a leaving log when leaving the scope of this variable.
 
-    Args
+    Args:
         invoker (object, optional): The object or class that invoked this method. Defaults to None
     
     Returns:
         _DebugTrace: An inner class object.
 
-    ---- Japanese from here ----
+    ---- Japanese ----
 
     関数やメソッドなどの実行ブロックに入る際にこのメソッドを呼び出す事で、開始のログを出力します。
     戻り値は何かの変数(例えば _)に格納してください。この変数のスコープを出る際に終了のログを出力します。
@@ -821,6 +1008,13 @@ def last_print_string() -> str:
 
     Returns:
         str: a last output string
+
+    ---- Japanese ----
+
+    最後の出力文字列を返します。
+
+    戻り値 :
+        str: 最後の出力文字列
     """
     lines = _last_print_buff.lines
     buff_string = '\n'.join(
