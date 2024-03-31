@@ -74,21 +74,21 @@ class LineBreakTest(unittest.TestCase):
         _ = debugtrace.enter()
         foo = '000000000011111111112222222222333333333344444444445555555555'
         debugtrace.print('foo', foo)
-        self.assertTrue("foo = (length:60)'0000000000" in debugtrace.last_print_string())
+        self.assertTrue("foo = '0000000000" in debugtrace.last_print_string())
 
     # since 1.0.3
     def test_no_line_break_object_name_value(self) -> None:
         _ = debugtrace.enter()
         foo = Contact('000000000011111111112222222222333333333344444444445555555555', '', date(2021, 1, 1), '')
         debugtrace.print('foo', foo)
-        self.assertTrue("  first_name: (length:60)'0000000000" in debugtrace.last_print_string())
+        self.assertTrue("  first_name: '0000000000" in debugtrace.last_print_string())
 
     # since 1.0.3
     def test_no_line_break_key_value(self) -> None:
         _ = debugtrace.enter()
         foo = {1: '000000000011111111112222222222333333333344444444445555555555'}
         debugtrace.print('foo', foo)
-        self.assertTrue("  1: (length:60)'0000000000" in debugtrace.last_print_string())
+        self.assertTrue("  1: '0000000000" in debugtrace.last_print_string())
 
 if __name__ == '__main__':
     unittest.main()

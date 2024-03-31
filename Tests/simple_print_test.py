@@ -53,10 +53,12 @@ class SimplePrintTest(unittest.TestCase):
         ('end', "'end'")
     ])
     def test_print(self, value: object, expected: str) -> None:
-        debugtrace.print('value', value)
-        self.assertTrue(debugtrace.last_print_string().startswith(
-            'value = ' + expected + ' (simple_print_test.py:'),
-            msg=debugtrace.last_print_string())
+        return_value = debugtrace.print('value', value)
+        print_string = debugtrace.last_print_string()
+        expected_string = 'value = ' + expected + ' (simple_print_test.py:'
+        self.assertTrue(print_string.startswith(expected_string), msg=print_string)
+        debugtrace.print('return_value', return_value)
+        self.assertEqual(return_value, value)
 
 if __name__ == '__main__':
     unittest.main()

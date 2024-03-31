@@ -4,16 +4,15 @@ __author__  = 'Masato Kokubo <masatokokubo@gmail.com>'
 
 from abc import abstractmethod
 from collections.abc import Collection, Iterable
-import configparser
 import datetime
 import inspect
-import logging
 from logging import config
 import os
 import sys
 import threading
 import traceback
 from typing import Dict, List, Tuple
+from typing import TypeVar
 import typing
 
 from debugtrace import config # since 1.2.0
@@ -22,6 +21,8 @@ from debugtrace.log_buffer import LogBuffer
 from debugtrace import loggers
 from debugtrace import _print as pr
 from debugtrace import version
+
+_VT = TypeVar("_VT") # Value Type
 
 # Configuration values
 _config: config.Config
@@ -97,22 +98,26 @@ class _PrintOptions(object):
         force_reflection: bool,
         output_private: bool,
         output_method: bool,
+        minimum_output_count: int,
+        minimum_output_length: int,
         collection_limit: int,
-        string_limit: int,
         bytes_limit: int,
+        string_limit: int,
         reflection_nest_limit:int
         ) -> None:
         """
         Initializes this object.
 
         Args:
-            force_reflection (bool): If True, outputs using reflection even if it has a __str__or __repr__ method
+            force_reflection (bool): If True, outputs using reflection even if it has a __str__ or __repr__ method
             output_private (bool): If True, also outputs private members when using reflection
             output_method (bool): If True, also outputs method members when using reflection
-            collection_limit (int): Output limit of collection elements (overrides debugtarace.ini value)
-            string_limit (int): Output limit of string characters (overrides debugtarace.ini value)
-            bytes_limit (int): Output limit of byte array elements (overrides debugtarace.ini value)
-            reflection_nest_limit (int): Nest limits when using reflection (overrides debugtarace.ini value)
+            minimum_output_count (int): The minimum value to output the number of elements for list, tuple and dict (Overrides debugtarace.ini value)
+            minimum_output_length: (int): The minimum value to output the length of string and bytes (Overrides debugtarace.ini value)
+            collection_limit (int): Output limit of collection elements (Overrides debugtarace.ini value)
+            bytes_limit (int): The limit value of elements for bytes and bytearray to output (Overrides debugtarace.ini value)
+            string_limit (int): The limit value of characters for string to output (Overrides debugtarace.ini value)
+            reflection_nest_limit (int): Nest limits when using reflection (Overrides debugtarace.ini value)
 
         ---- Japanese ----
 
@@ -122,17 +127,21 @@ class _PrintOptions(object):
             force_reflection (bool): Trueの場合、__str__または__repr__メソッドがあってもリフレクションを使用して出力する
             output_private (bool): Trueの場合、リフレクションの使用時にプライベートメンバーも出力する
             output_method (bool): Trueの場合、リフレクションの使用時にメソッドメンバーも出力する
-            collection_limit (int): コレクション要素の出力制限 (debugtarace.ini値を上書き)
-            string_limit (int): 文字列文字の出力制限 (debugtarace.ini値を上書き)
-            bytes_limit (int): バイト配列要素の出力制限 (debugtarace.ini値を上書き)
-            Reflection_nest_limit (int): リフレクション使用時のネストの制限 (debugtarace.ini値を上書き)
+            minimum_output_count (int): list, tuple, dict等の要素数を出力する最小値 (debugtarace.iniの値より優先)
+            minimum_output_length: (int): 文字列, bytesの要素数を出力する最小値 (debugtarace.iniの値より優先)
+            collection_limit (int): コレクション要素の出力制限 (debugtarace.iniの値より優先)
+            bytes_limit (int): バイト配列要素の出力制限 (debugtarace.iniの値より優先)
+            string_limit (int): 文字列文字の出力制限 (debugtarace.iniの値より優先)
+            Reflection_nest_limit (int): リフレクション使用時のネストの制限 (debugtarace.iniの値より優先)
         """
         self.force_reflection = force_reflection
         self.output_private   = output_private
         self.output_method    = output_method
+        self.minimum_output_count  = _config.minimum_output_count  if minimum_output_count  == -1 else minimum_output_count     
+        self.minimum_output_length = _config.minimum_output_length if minimum_output_length == -1 else minimum_output_length     
         self.collection_limit      = _config.collection_limit      if collection_limit      == -1 else collection_limit     
-        self.string_limit          = _config.string_limit          if string_limit          == -1 else string_limit         
         self.bytes_limit           = _config.bytes_limit           if bytes_limit           == -1 else bytes_limit          
+        self.string_limit          = _config.string_limit          if string_limit          == -1 else string_limit         
         self.reflection_nest_limit = _config.reflection_nest_limit if reflection_nest_limit == -1 else reflection_nest_limit
 
 # since 1.2.0
@@ -430,7 +439,7 @@ def _to_string_refrection(value: object, print_options: _PrintOptions) -> LogBuf
     Returns a LogBuffer containing a string representation of the value with reflection.
 
     Args:
-        value (bytes): The value to append
+        value (object): The value to append
         print_options (_PrintOptions): Output options 
 
     Returns:
@@ -475,7 +484,7 @@ def _to_string_refrection_body(value: object, print_options: _PrintOptions) -> L
     Returns a LogBuffer containing the body of a string representation of the value with reflection.
 
     Args:
-        value (bytes): The value to append
+        value (object): The value to append
         print_options (_PrintOptions): Output options 
 
     Returns:
@@ -533,7 +542,7 @@ def _to_string_iterable(values: Collection, print_options: _PrintOptions) -> Log
     Returns a LogBuffer containing a string representation of the iterable value.
 
     Args:
-        value (object): The iterable value to append
+        value (Collection): The iterable value to append
         print_options (_PrintOptions): Output options 
 
     Returns:
@@ -591,7 +600,7 @@ def _to_string_iterable_body(values: Iterable, print_options: _PrintOptions) -> 
     Returns a LogBuffer containing the body of a string representation of the iterable value.
 
     Args:
-        value (object): The iterable value to append
+        value (Iterable): The iterable value to append
         print_options (_PrintOptions): Output options 
 
     Returns:
@@ -804,28 +813,35 @@ def _print_start():
 
         _before_thread_id = thread_id
 
-def print(name: str, value: object = _DO_NOT_OUTPUT, *,
+def print(name: str, value: _VT = _DO_NOT_OUTPUT, *,
         force_reflection: bool = False,
         output_private: bool = False,
         output_method: bool = False,
+        minimum_output_count: int = -1,
+        minimum_output_length: int = -1,
         collection_limit: int = -1,
-        string_limit: int = -1,
         bytes_limit: int = -1,
+        string_limit: int = -1,
         reflection_nest_limit: int = -1
-        ) -> None:
+        ) -> _VT:
     """
     Outputs the name and value.
 
     Args:
         name (str): The name of the value (simply output message if the value is omitted).
         value (object, optional): The value to output if not omitted.
-        force_reflection (bool, optional): If True, outputs using reflection even if it has a __str__ or __repr__ method. Defaults to False
-        output_private (bool, optional): If True, also outputs private members when using reflection. Defaults to False
-        output_method (bool, optional): If True, also outputs method members when using reflection. Defaults to False
-        collection_limit (int, optional): Output limit of collection elements (overrides debugtarace.ini value). Defaults to 512
-        string_limit (int, optional): Output limit of string characters (overrides debugtarace.ini value). Defaults to 8192
-        bytes_limit (int, optional): Output limit of byte array elements (overrides debugtarace.ini value). Defaults to 8192
-        reflection_nest_limit (int, optional): Nest limits when using reflection (overrides debugtarace.ini value). Defaults to 4
+        force_reflection (bool, optional): If True, outputs using reflection even if it has a __str__ or __repr__ method. Default is False
+        output_private (bool, optional): If True, also outputs private members when using reflection. Default is False
+        output_method (bool, optional): If True, also outputs method members when using reflection. Default is False
+        minimum_output_count (int, optional): The minimum value to output the number of elements for list, tuple and dict (Overrides debugtarace.ini value). Default is 128
+        minimum_output_length (int, optional): The minimum value to output the length of string and bytes (Overrides debugtarace.ini value). Default is 256
+        collection_limit (int, optional): Output limit of collection elements (Overrides debugtarace.ini value). Default is 128
+        bytes_limit (int, optional): Output limit of byte array elements (Overrides debugtarace.ini value). Default is 256
+        string_limit (int, optional): Output limit of string characters (Overrides debugtarace.ini value). Default is 256
+        reflection_nest_limit (int, optional): Nest limits when using reflection (Overrides debugtarace.ini value). Default is 4
+
+    Returns:
+        _VT: The value
 
     ---- Japanese ----
     
@@ -837,14 +853,19 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         force_reflection (bool, optional): Trueの場合、__str__または__repr__メソッドが定義されていてもリフレクションを使用する。デフォルトはFalse
         output_private (bool, optional): Trueの場合、プライベートメンバーも出力する。デフォルトはFalse
         output_method (bool, optional): Trueの場合、メソッドも出力する。デフォルトはFalse
-        collection_limit (int, optional): コレクションの要素の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは512
-        string_limit (int, optional): 文字列値の出力文字数の制限 (debugtarace.iniの値より優先)。デフォルトは8192
-        bytes_limit (int, optional): バイト配列bytesの内容の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは8192
+        minimum_output_count (int, optional): list, tuple, dict等の要素数を出力する最小値 (debugtarace.iniの値より優先)。デフォルトは128
+        minimum_output_length (int, optional): 文字列, bytesの要素数を出力する最小値 (debugtarace.iniの値より優先)。デフォルトは256
+        collection_limit (int, optional): コレクションの要素の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは128
+        bytes_limit (int, optional): バイト配列bytesの内容の出力数の制限 (debugtarace.iniの値より優先)。デフォルトは256
+        string_limit (int, optional): 文字列値の出力文字数の制限 (debugtarace.iniの値より優先)。デフォルトは256
         reflection_nest_limit (int, optional): リフレクションのネスト数の制限 (debugtarace.iniの値より優先)。デフォルトは4
+
+    戻り値:
+        _VT: 引数の値
     """
     global _last_print_buff
 
-    if not _config.is_enabled: return
+    if not _config.is_enabled: return value
 
     with _thread_lock:
         _print_start()
@@ -863,7 +884,8 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
             # with value
             print_options = _PrintOptions(
                 force_reflection, output_private, output_method,
-                collection_limit, string_limit, bytes_limit, reflection_nest_limit)
+                minimum_output_count, minimum_output_length,
+                collection_limit, bytes_limit, string_limit, reflection_nest_limit)
 
             _last_print_buff = _to_string(name, value, print_options)
 
@@ -883,6 +905,8 @@ def print(name: str, value: object = _DO_NOT_OUTPUT, *,
         lines = _last_print_buff.lines
         for line in lines:
             _logger.print(_get_indent_string(state.nest_level, line[0]) + line[1])
+
+        return value
 
 class _DebugTrace(object):
     """
@@ -984,7 +1008,7 @@ def enter(invoker: object=None) -> _DebugTrace:
     Outputs a leaving log when leaving the scope of this variable.
 
     Args:
-        invoker (object, optional): The object or class that invoked this method. Defaults to None
+        invoker (object, optional): The object or class that invoked this method. Default is None
     
     Returns:
         _DebugTrace: An inner class object.
